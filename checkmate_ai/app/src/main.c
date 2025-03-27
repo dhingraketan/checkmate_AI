@@ -107,10 +107,20 @@ int main() {
             }
             // If destination contains an opponent's piece, announce capture.
             if(board[destRow][destCol].type != EMPTY) {
-                printf("Captured %s %s at %d%c.\n", 
-                       (board[destRow][destCol].color == WHITE ? "White" : "Black"),
-                       getPieceName(board[destRow][destCol]),
-                       destRow + 1, 'A' + destCol);
+                if(board[destRow][destCol].type == KING) {
+                    printf("Captured %s %s at %d%c.\n", 
+                           (board[destRow][destCol].color == WHITE ? "White" : "Black"),
+                           getPieceName(board[destRow][destCol]),
+                           destRow + 1, 'A' + destCol);
+                    printf("Game over: %s King has been killed.\n", 
+                           (board[destRow][destCol].color == WHITE ? "White" : "Black"));
+                    exit(0);
+                } else {
+                    printf("Captured %s %s at %d%c.\n", 
+                           (board[destRow][destCol].color == WHITE ? "White" : "Black"),
+                           getPieceName(board[destRow][destCol]),
+                           destRow + 1, 'A' + destCol);
+                }
             }
             // Move the piece.
             board[destRow][destCol] = board[selectedRow][selectedCol];
@@ -118,6 +128,17 @@ int main() {
             board[selectedRow][selectedCol].type = EMPTY;
             board[selectedRow][selectedCol].color = NONE;
             board[selectedRow][selectedCol].moved = 0;
+            
+            // Check for pawn promotion:
+            // For WHITE: pawn promoted if it reaches row 0.
+            // For BLACK: pawn promoted if it reaches row 7.
+            if(board[destRow][destCol].type == PAWN) {
+                if((board[destRow][destCol].color == WHITE && destRow == 0) ||
+                   (board[destRow][destCol].color == BLACK && destRow == 7)) {
+                    board[destRow][destCol].type = QUEEN;
+                    printf("Pawn promoted to Queen at %d%c.\n", destRow + 1, 'A' + destCol);
+                }
+            }
             
             // Clear selection.
             pieceSelected = 0;
@@ -178,7 +199,6 @@ void printBoard() {
         for(int c = 0; c < 8; c++){
             // If a piece is selected and this square is a valid move, show marker.
             if(pieceSelected && possible[r][c]) {
-                
                 if(board[r][c].type != EMPTY && board[r][c].color != board[selectedRow][selectedCol].color)
                     printf("✹  ");
                 else
@@ -227,7 +247,7 @@ int parseCoordinate(const char *input, int *row, int *col) {
 }
 
 // Calculate valid moves for the piece at board[r][c].
-// (This example implements basic moves for each piece type; special moves are omitted.)
+
 void getPossibleMoves(int r, int c) {
     Piece piece = board[r][c];
     if(piece.type == EMPTY)
@@ -353,7 +373,7 @@ void getPossibleMoves(int r, int c) {
                     possible[nr][nc] = 1;
             }
         }
-        // Note: Castling is not implemented in this simple version.
+        
     }
 }
 
