@@ -1,5 +1,5 @@
-#include "hal/port_extender.h"
-#include "hal/i2c_module.h"
+#include "port_extender.h"
+#include "i2c_module.h"
 #include <stdbool.h>
 #include <unistd.h>
 #include <stdio.h>

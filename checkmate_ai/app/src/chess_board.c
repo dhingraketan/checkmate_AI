@@ -1,5 +1,5 @@
 #include "chess_board.h"
-#include "hal/port_extender.h"
+#include "port_extender.h"
 
 #include <stdbool.h>
 
