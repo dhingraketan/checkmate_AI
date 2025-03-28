@@ -1,0 +1,40 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+// Define piece types and colors.
+typedef enum { EMPTY, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING } PieceType;
+typedef enum { NONE, WHITE, BLACK } Color;
+
+// New enum for side classification.
+typedef enum { NONE_SIDE, KING_SIDE, QUEEN_SIDE } Side;
+
+typedef struct {
+    PieceType type;
+    Color color;
+    int moved;  // For future use (pawn first move, castling, etc.)
+    Side side;  // Indicates if the piece is king-side or queen-side.
+} Piece;
+
+// Global board: board[row][col] where row:0..7 (maps to 1..8) and col:0..7 (maps to A..H)
+extern Piece board[8][8];
+
+// Array to mark possible moves (1 = valid move, 0 = not).
+extern int possible[8][8];
+
+// Variables for selection state.
+extern int pieceSelected;   // 0: no piece selected, 1: a piece is in "air"
+extern int selectedRow, selectedCol;
+
+// Global variable for turn management; starting with BLACK (as in your sample).
+extern Color currentTurn;
+
+// Function prototypes.
+void initializeBoard();
+void printBoard();
+void getPieceSymbol(Piece p, char *symbol);
+int parseCoordinate(const char *input, int *row, int *col);
+void getPossibleMoves(int r, int c);
+const char* getPieceName(Piece p);
