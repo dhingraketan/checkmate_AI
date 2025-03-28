@@ -24,5 +24,8 @@ add_custom_command(TARGET manager POST_BUILD
   COMMAND "${CMAKE_COMMAND}" -E copy 
      "$<TARGET_FILE:manager>"
      "~/cmpt433/public/myApps/manager" 
-  COMMENT "Copying manager executable to public NFS directory")
+   COMMAND "${CMAKE_COMMAND}" -E copy 
+     "${CMAKE_SOURCE_DIR}/hal/src/stockfish_game_engine"
+     "$ENV{HOME}/cmpt433/public/myApps/stockfish_game_engine" 
+  COMMENT "Copying manager and game engine executable to public NFS directory")
 
