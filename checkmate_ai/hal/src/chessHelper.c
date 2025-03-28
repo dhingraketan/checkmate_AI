@@ -250,3 +250,145 @@ const char* getPieceName(Piece p) {
         default:     return "Empty";
     }
 }
+
+
+int validateInput(const char *input) {
+    if (strchr(input, ',') != NULL) {
+        printf("Error: Cannot pick two pieces at once!\n");
+        return 0;
+    }
+    return 1;
+}
+
+// Depending on whether a piece is already selected, dispatch to the proper processor.
+void processInput(const char *input) {
+    if (!pieceSelected)
+        processPieceSelection(input);
+    else
+        processDestination(input);
+}
+
+// Process input when no piece is selected (piece selection).
+void processPieceSelection(const char *input) {
+    int row, col;
+    if (!parseCoordinate(input, &row, &col)) {
+        printf("Invalid input format. Try again.\n");
+        return;
+    }
+    // Verify the square contains a piece of the current turn.
+    if (board[row][col].type == EMPTY || board[row][col].color != currentTurn) {
+        printf("Invalid selection: No %s piece at that square.\n",
+               (currentTurn == WHITE ? "WHITE" : "BLACK"));
+        return;
+    }
+    pieceSelected = 1;
+    selectedRow = row;
+    selectedCol = col;
+    memset(possible, 0, sizeof(possible));
+    getPossibleMoves(row, col);
+}
+
+// Process input when a piece is already selected (destination selection).
+void processDestination(const char *input) {
+    int destRow, destCol;
+    if (!parseCoordinate(input, &destRow, &destCol)) {
+        printf("Invalid input format. Try again.\n");
+        return;
+    }
+    if (!possible[destRow][destCol]) {
+        // Allow deselection if the same square is chosen.
+        if (destRow == selectedRow && destCol == selectedCol) {
+            pieceSelected = 0;
+            memset(possible, 0, sizeof(possible));
+            return;
+        }
+        printf("Invalid move, try again.\n");
+        return;
+    }
+    // Handle captures.
+    if (board[destRow][destCol].type != EMPTY) {
+        if (board[destRow][destCol].type == KING) {
+            printf("Captured %s %s at %d%c.\n",
+                   (board[destRow][destCol].color == WHITE ? "White" : "Black"),
+                   getPieceName(board[destRow][destCol]),
+                   destRow + 1, 'A' + destCol);
+            printf("Game over: %s King has been killed.\n",
+                   (board[destRow][destCol].color == WHITE ? "White" : "Black"));
+            // End the thread if the king is captured.
+            pthread_exit(NULL);
+        } else {
+            printf("Captured %s %s at %d%c.\n",
+                   (board[destRow][destCol].color == WHITE ? "White" : "Black"),
+                   getPieceName(board[destRow][destCol]),
+                   destRow + 1, 'A' + destCol);
+        }
+    }
+    // Move the piece.
+    board[destRow][destCol] = board[selectedRow][selectedCol];
+    board[selectedRow][selectedCol].type = EMPTY;
+    board[selectedRow][selectedCol].color = NONE;
+    board[selectedRow][selectedCol].moved = 0;
+    
+    // Check for pawn promotion.
+    if (board[destRow][destCol].type == PAWN) {
+        if ((board[destRow][destCol].color == WHITE && destRow == 0) ||
+            (board[destRow][destCol].color == BLACK && destRow == 7)) {
+            board[destRow][destCol].type = QUEEN;
+            printf("Pawn promoted to Queen at %d%c.\n", destRow + 1, 'A' + destCol);
+        }
+    }
+    
+    // Clear selection and switch turn.
+    pieceSelected = 0;
+    memset(possible, 0, sizeof(possible));
+    currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
+}
+
+
+
+void *chessGameThread(void *arg) {
+    (void)arg;
+
+    char input[100];
+
+    // Initialize the board.
+    initializeBoard();
+
+    while (1) {
+        // Display whose turn it is.
+        printf("\n%s Turn\n", (currentTurn == WHITE ? "WHITE" : "BLACK"));
+        // Print the board.
+        printBoard();
+        
+        // Display piece selection status.
+        if (pieceSelected)
+            printf("inAir [%d%c]\n", selectedRow + 1, 'A' + selectedCol);
+        else
+            printf("inAir []\n");
+
+        // Prompt for input.
+        printf("INPUT: ");
+        if (!fgets(input, sizeof(input), stdin))
+            break;
+        // Remove trailing newline.
+        input[strcspn(input, "\n")] = 0;
+        
+        // Validate input.
+        if (!validateInput(input))
+            continue;
+        
+        // Process the input.
+        processInput(input);
+    }
+    pthread_exit(NULL);
+}
+
+
+//for board state
+void copyBoardState(Piece dest[8][8]) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            dest[i][j] = board[i][j];
+        }
+    }
+}
