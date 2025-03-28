@@ -1,8 +1,8 @@
 # Build the app, using the HAL
 
 include_directories(include)
-file(GLOB MY_SOURCES "src/chess_board.c" "src/main.c")
-file(GLOB MANAGER_SOURCES "src/sensor_game_engine_manager.c")
+file(GLOB MY_SOURCES "src/chess_board.c" "src/test.c" )
+file(GLOB MANAGER_SOURCES "src/sensor_game_engine_manager.c" "src/main.c")
 
 add_executable(extender ${MY_SOURCES})
 add_executable(manager ${MANAGER_SOURCES})

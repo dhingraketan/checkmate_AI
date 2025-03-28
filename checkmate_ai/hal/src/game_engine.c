@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define BUFFER_SIZE 2048
-#define DEFAULT_DEPTH 2
+#define DEFAULT_DEPTH 10
 #define STOCKFISH_EXECUTABLE_PATH "./stockfish_game_engine"
 
 static bool isInit = false;
@@ -16,14 +16,32 @@ static int fromEngine[2];
 static pid_t pid;
 static char readBuffer[BUFFER_SIZE];
 static char writeBuffer[BUFFER_SIZE];
-static char cmdText[BUFFER_SIZE/2];
+static char cmdText[BUFFER_SIZE];
+static char lookForText[BUFFER_SIZE];
+
 static const char* initCommands[] = {
     "uci\n",
+    "isready\n",
     "ucinewgame\n",
     "position starpos\n",
     "setoption name UCI_ShowWDL value false\n",
     NULL
 };
+
+static bool gameEngine_alive(pid_t pid) {
+    int status;
+    pid_t result = waitpid(pid, &status, WNOHANG);
+
+    printf("checking if its alive\n");
+
+    if (result == 0) return true;  
+
+    if (result == -1) {
+        perror("waitpid");
+        return false;
+    }
+    return false;  
+}
 
 void gameEngine_init(){
     isInit = true;
@@ -68,44 +86,65 @@ void gameEngine_init(){
 
 }
 
-static void gameEngine_writeToPipe(char * writeText){
+static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor){
     memset(writeBuffer, 0, BUFFER_SIZE);
     memset(readBuffer, 0, BUFFER_SIZE);
 
-    write(toEngine[1], writeText, strlen(writeText));
-}
-
-static void gameEngine_goCmd(){
-    
-    snprintf(cmdText, BUFFER_SIZE, "go depth %d\n", DEFAULT_DEPTH);
-    gameEngine_writeToPipe(cmdText);
+    write(toEngine[1], cmdText, strlen(cmdText));
+    printf("here1\n");
 
     ssize_t bytes_read;
+    // char accumulatedOutput[BUFFER_SIZE * 4] = {0};
+
+    printf("here2\n");
+
     // printf("reading\n");
-    while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
-        readBuffer[bytes_read] = '\0';
-        // printf("curr %s", readBuffer);
+    if(lookFor != NULL){
+        printf("going back\n");
+        while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
+            readBuffer[bytes_read] = '\0';
+            printf("curr %s", readBuffer);
 
-        if (strstr(readBuffer, "bestmove")) {
-            printf("this is the best move found %s\n", readBuffer);
-            break;
+
+            if (strstr(readBuffer, lookFor)) {
+                printf("found %s\n",readBuffer);
+                break;
+            }
+            // printf("here3\n");
+            memset(readBuffer, 0, BUFFER_SIZE);
+
         }
-
-        memset(readBuffer, 0, BUFFER_SIZE);
-
     }
+    printf("done writing and reading \n");
 }
 
-void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd){
+
+void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString){
+    memset(cmdText, 0, BUFFER_SIZE);
+    memset(lookForText, 0, BUFFER_SIZE);
+
+    if(!gameEngine_alive(pid)) return;
+
     if(cmd == CMD_GO){
-        printf("sending go cmd\n");
-        gameEngine_goCmd();
+        printf("sending go cmd 1\n");
+        snprintf(cmdText, BUFFER_SIZE, "go depth %d\n", DEFAULT_DEPTH );
+        snprintf(lookForText, BUFFER_SIZE, "bestmove");
+
     }
+    else if(cmd == CMD_POSITION){
+        printf("sending position cmd\n");
+        snprintf(cmdText, BUFFER_SIZE, "position %s\nisready\n", fenString );
+        snprintf(lookForText, BUFFER_SIZE, "readyok\n");
+    }
+    printf("talking\n");
+    gameEngine_talkToGameEngine(cmdText, lookForText);
+    printf("talking done\n");
+
 }
 
 void gameEngine_cleanup(){
     isInit = false;
-
+    printf("in cleanup\n");
     write(toEngine[1], "quit\n", 5);
 
     close(toEngine[1]);

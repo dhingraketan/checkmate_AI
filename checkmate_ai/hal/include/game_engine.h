@@ -8,7 +8,7 @@ typedef enum {
 } GAME_ENGINE_CMDS;
 
 void gameEngine_init();
-void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd);
+void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString);
 void gameEngine_cleanup();
 
 #endif

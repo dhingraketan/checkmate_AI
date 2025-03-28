@@ -7,7 +7,7 @@ typedef enum  {
     GAME_MODE_NUM
 } GAME_MODE;
 
-char *fenString[7] =  {"-", "p", "r", "k", "b", "q", "k"}; // this has to match the PieceType enum
+char *fenString[7] =  {"-", "p", "r", "n", "b", "q", "k"}; // this has to match the PieceType enum
 
 static void * SensorGameEngineManager_init();
 static void SensorGameEngineManager_cleanup();
