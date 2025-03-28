@@ -19,17 +19,6 @@ typedef struct {
     Side side;  // Indicates if the piece is king-side or queen-side.
 } Piece;
 
-// Global board: board[row][col] where row:0..7 (maps to 1..8) and col:0..7 (maps to A..H)
-extern Piece board[8][8];
-
-// Array to mark possible moves (1 = valid move, 0 = not).
-extern int possible[8][8];
-
-// Variables for selection state.
-extern int pieceSelected;   // 0: no piece selected, 1: a piece is in "air"
-extern int selectedRow, selectedCol;
-
-extern Color currentTurn;
 
 // Function prototypes.
 void initializeBoard();
@@ -53,3 +42,7 @@ void processDestination(const char *input);
 
 
 void copyBoardState(Piece dest[8][8]); //for board state
+
+char getCurrentTurnString();
+
+void toggleCurrentTurn();

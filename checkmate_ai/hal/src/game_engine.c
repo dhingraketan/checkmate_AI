@@ -45,6 +45,7 @@ static bool gameEngine_alive(pid_t pid) {
 
 void gameEngine_init(){
     isInit = true;
+    printf("low level game engine init\n");
 
     if(pipe(toEngine) == -1 || pipe(fromEngine)){
         perror("Pipe not created\n");
@@ -86,7 +87,7 @@ void gameEngine_init(){
 
 }
 
-static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor){
+static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lineFound){
     memset(writeBuffer, 0, BUFFER_SIZE);
     memset(readBuffer, 0, BUFFER_SIZE);
 
@@ -96,18 +97,26 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor){
     ssize_t bytes_read;
     // char accumulatedOutput[BUFFER_SIZE * 4] = {0};
 
-    printf("here2\n");
+    printf("here4\n");
 
     // printf("reading\n");
-    if(lookFor != NULL){
+    if(lookFor != NULL && lookFor[0] != '\0'){
         printf("going back\n");
         while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
             readBuffer[bytes_read] = '\0';
-            printf("curr %s", readBuffer);
+            // printf("curr %s", readBuffer);
 
 
             if (strstr(readBuffer, lookFor)) {
-                printf("found %s\n",readBuffer);
+                char *line = strtok(readBuffer, "\n");
+                while (line != NULL) {
+                    if (strstr(line, lookFor)) {
+                        printf("Found in line: %s\n", line);
+                        strncpy(lineFound, line, strlen(line));
+                        break;
+                    }
+                    line = strtok(NULL, "\n");
+                }
                 break;
             }
             // printf("here3\n");
@@ -119,7 +128,7 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor){
 }
 
 
-void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString){
+void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine){
     memset(cmdText, 0, BUFFER_SIZE);
     memset(lookForText, 0, BUFFER_SIZE);
 
@@ -133,11 +142,19 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString){
     }
     else if(cmd == CMD_POSITION){
         printf("sending position cmd\n");
-        snprintf(cmdText, BUFFER_SIZE, "position %s\nisready\n", fenString );
+        snprintf(cmdText, BUFFER_SIZE, "position fen %s\n", fenString );
+        // snprintf(cmdText, BUFFER_SIZE, "isready\n");
+        // snprintf(lookForText, BUFFER_SIZE, "readyok\n");
+    }
+    else if(cmd == CMD_IS_READY){
+        printf("sending is ready cmd\n");
+        snprintf(cmdText, BUFFER_SIZE, "isready\n");
+        snprintf(cmdText, BUFFER_SIZE, "isready\n");
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     printf("talking\n");
-    gameEngine_talkToGameEngine(cmdText, lookForText);
+
+    gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
     printf("talking done\n");
 
 }

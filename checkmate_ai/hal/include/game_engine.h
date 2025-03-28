@@ -4,11 +4,12 @@
 typedef enum {
     CMD_POSITION,
     CMD_GO,
+    CMD_IS_READY,
     CMD_NUM_CMDS
 } GAME_ENGINE_CMDS;
 
 void gameEngine_init();
-void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString);
+void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine);
 void gameEngine_cleanup();
 
 #endif

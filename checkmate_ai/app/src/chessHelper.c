@@ -1,15 +1,24 @@
-#include "hal/chessHelper.h"
+#include "chessHelper.h"
+#include "sensor_game_engine_manager.h"
 
-// Define global variables.
-Piece board[8][8];
-int possible[8][8];
-int pieceSelected = 0;
-int selectedRow = -1, selectedCol = -1;
-Color currentTurn = BLACK;
+
+pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t userTurnCond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
+bool isStockfishTurn = false;
+bool isUserTurn = true;
+
+static Piece board[8][8];
+static int possible[8][8];
+static int pieceSelected = 0;
+static int selectedRow = -1, selectedCol = -1;
+static Color currentTurn = WHITE;
+
 
 // Initialize board with standard chess starting positions.
 void initializeBoard() {
     // Set all squares to EMPTY.
+    // //pthread_mutex_lock(&boardMutex);
     for (int r = 0; r < 8; r++){
         for (int c = 0; c < 8; c++){
             board[r][c].type = EMPTY;
@@ -18,36 +27,37 @@ void initializeBoard() {
             board[r][c].side = NONE_SIDE; // Default side.
         }
     }
+    // //pthread_mutex_unlock(&boardMutex);
     // Standard setup:
     // Black pieces (placed on rows 0 and 1)
     // Row 0.
-    board[0][0].type = ROOK;   board[0][0].color = BLACK; board[0][0].side = QUEEN_SIDE;
-    board[0][1].type = KNIGHT; board[0][1].color = BLACK; board[0][1].side = QUEEN_SIDE;
-    board[0][2].type = BISHOP; board[0][2].color = BLACK; board[0][2].side = QUEEN_SIDE;
-    board[0][3].type = QUEEN;  board[0][3].color = BLACK; board[0][3].side = NONE_SIDE;
-    board[0][4].type = KING;   board[0][4].color = BLACK; board[0][4].side = NONE_SIDE;
-    board[0][5].type = BISHOP; board[0][5].color = BLACK; board[0][5].side = KING_SIDE;
-    board[0][6].type = KNIGHT; board[0][6].color = BLACK; board[0][6].side = KING_SIDE;
-    board[0][7].type = ROOK;   board[0][7].color = BLACK; board[0][7].side = KING_SIDE;
+    board[0][0].type = ROOK;   board[0][0].color = WHITE; board[0][0].side = QUEEN_SIDE;
+    board[0][1].type = KNIGHT; board[0][1].color = WHITE; board[0][1].side = QUEEN_SIDE;
+    board[0][2].type = BISHOP; board[0][2].color = WHITE; board[0][2].side = QUEEN_SIDE;
+    board[0][3].type = QUEEN;  board[0][3].color = WHITE; board[0][3].side = NONE_SIDE;
+    board[0][4].type = KING;   board[0][4].color = WHITE; board[0][4].side = NONE_SIDE;
+    board[0][5].type = BISHOP; board[0][5].color = WHITE; board[0][5].side = KING_SIDE;
+    board[0][6].type = KNIGHT; board[0][6].color = WHITE; board[0][6].side = KING_SIDE;
+    board[0][7].type = ROOK;   board[0][7].color = WHITE; board[0][7].side = KING_SIDE;
     for (int c = 0; c < 8; c++){
         board[1][c].type = PAWN;
-        board[1][c].color = BLACK;
+        board[1][c].color = WHITE;
         board[1][c].side = NONE_SIDE;
     }
     // White pieces (placed on rows 6 and 7)
     for (int c = 0; c < 8; c++){
         board[6][c].type = PAWN;
-        board[6][c].color = WHITE;
+        board[6][c].color = BLACK;
         board[6][c].side = NONE_SIDE;
     }
-    board[7][0].type = ROOK;   board[7][0].color = WHITE; board[7][0].side = QUEEN_SIDE;
-    board[7][1].type = KNIGHT; board[7][1].color = WHITE; board[7][1].side = QUEEN_SIDE;
-    board[7][2].type = BISHOP; board[7][2].color = WHITE; board[7][2].side = QUEEN_SIDE;
-    board[7][3].type = QUEEN;  board[7][3].color = WHITE; board[7][3].side = NONE_SIDE;
-    board[7][4].type = KING;   board[7][4].color = WHITE; board[7][4].side = NONE_SIDE;
-    board[7][5].type = BISHOP; board[7][5].color = WHITE; board[7][5].side = KING_SIDE;
-    board[7][6].type = KNIGHT; board[7][6].color = WHITE; board[7][6].side = KING_SIDE;
-    board[7][7].type = ROOK;   board[7][7].color = WHITE; board[7][7].side = KING_SIDE;
+    board[7][0].type = ROOK;   board[7][0].color = BLACK; board[7][0].side = QUEEN_SIDE;
+    board[7][1].type = KNIGHT; board[7][1].color = BLACK; board[7][1].side = QUEEN_SIDE;
+    board[7][2].type = BISHOP; board[7][2].color = BLACK; board[7][2].side = QUEEN_SIDE;
+    board[7][3].type = QUEEN;  board[7][3].color = BLACK; board[7][3].side = NONE_SIDE;
+    board[7][4].type = KING;   board[7][4].color = BLACK; board[7][4].side = NONE_SIDE;
+    board[7][5].type = BISHOP; board[7][5].color = BLACK; board[7][5].side = KING_SIDE;
+    board[7][6].type = KNIGHT; board[7][6].color = BLACK; board[7][6].side = KING_SIDE;
+    board[7][7].type = ROOK;   board[7][7].color = BLACK; board[7][7].side = KING_SIDE;
 }
 
 // Print the board state and possible moves.
@@ -55,6 +65,8 @@ void printBoard() {
     char symbol[5];
     // Print column header.
     printf("  A  B  C  D  E  F  G  H\n");
+
+    //pthread_mutex_lock(&boardMutex);
     for (int r = 0; r < 8; r++){
         printf("%d ", r + 1);
         for (int c = 0; c < 8; c++){
@@ -71,6 +83,8 @@ void printBoard() {
         }
         printf("\n");
     }
+    //pthread_mutex_unlock(&boardMutex);
+
 }
 
 // Convert a piece to its display symbol.
@@ -97,7 +111,7 @@ int parseCoordinate(const char *input, int *row, int *col) {
     int r;
     char colChar;
     // Expect input format: a number (row) followed by a letter (column).
-    if (sscanf(input, "%d%c", &r, &colChar) != 2)
+    if (sscanf(input, "%c%d", &colChar, &r) != 2)
         return 0;
     colChar = toupper(colChar);
     if (r < 1 || r > 8 || colChar < 'A' || colChar > 'H')
@@ -115,8 +129,9 @@ void getPossibleMoves(int r, int c) {
         return;
     
     // Pawn moves.
+    ////pthread_mutex_lock(&boardMutex);
     if (piece.type == PAWN) {
-        if (piece.color == WHITE) {
+        if (piece.color == BLACK) {
             if (r - 1 >= 0 && board[r - 1][c].type == EMPTY) {
                 possible[r - 1][c] = 1;
                 if (r == 6 && board[r - 2][c].type == EMPTY)
@@ -125,11 +140,11 @@ void getPossibleMoves(int r, int c) {
             // Diagonal captures.
             if (r - 1 >= 0 && c - 1 >= 0 &&
                 board[r - 1][c - 1].type != EMPTY &&
-                board[r - 1][c - 1].color == BLACK)
+                board[r - 1][c - 1].color == WHITE)
                 possible[r - 1][c - 1] = 1;
             if (r - 1 >= 0 && c + 1 < 8 &&
                 board[r - 1][c + 1].type != EMPTY &&
-                board[r - 1][c + 1].color == BLACK)
+                board[r - 1][c + 1].color == WHITE)
                 possible[r - 1][c + 1] = 1;
         } else { // BLACK pawn moves.
             if (r + 1 < 8 && board[r + 1][c].type == EMPTY) {
@@ -139,11 +154,11 @@ void getPossibleMoves(int r, int c) {
             }
             if (r + 1 < 8 && c - 1 >= 0 &&
                 board[r + 1][c - 1].type != EMPTY &&
-                board[r + 1][c - 1].color == WHITE)
+                board[r + 1][c - 1].color == BLACK)
                 possible[r + 1][c - 1] = 1;
             if (r + 1 < 8 && c + 1 < 8 &&
                 board[r + 1][c + 1].type != EMPTY &&
-                board[r + 1][c + 1].color == WHITE)
+                board[r + 1][c + 1].color == BLACK)
                 possible[r + 1][c + 1] = 1;
         }
     }
@@ -236,6 +251,7 @@ void getPossibleMoves(int r, int c) {
         }
         // Note: Castling is not implemented in this simple version.
     }
+    //pthread_mutex_unlock(&boardMutex);
 }
 
 // Return a string name for the piece type.
@@ -275,12 +291,15 @@ void processPieceSelection(const char *input) {
         printf("Invalid input format. Try again.\n");
         return;
     }
+    //pthread_mutex_lock(&boardMutex);
     // Verify the square contains a piece of the current turn.
     if (board[row][col].type == EMPTY || board[row][col].color != currentTurn) {
         printf("Invalid selection: No %s piece at that square.\n",
                (currentTurn == WHITE ? "WHITE" : "BLACK"));
         return;
     }
+    //pthread_mutex_unlock(&boardMutex);
+
     pieceSelected = 1;
     selectedRow = row;
     selectedCol = col;
@@ -305,6 +324,8 @@ void processDestination(const char *input) {
         printf("Invalid move, try again.\n");
         return;
     }
+
+    //pthread_mutex_lock(&boardMutex);
     // Handle captures.
     if (board[destRow][destCol].type != EMPTY) {
         if (board[destRow][destCol].type == KING) {
@@ -337,17 +358,21 @@ void processDestination(const char *input) {
             printf("Pawn promoted to Queen at %d%c.\n", destRow + 1, 'A' + destCol);
         }
     }
+
+    ////pthread_mutex_unlock(&boardMutex);
+
     
     // Clear selection and switch turn.
     pieceSelected = 0;
     memset(possible, 0, sizeof(possible));
-    currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
+    toggleCurrentTurn();
 }
 
 
 
 void *chessGameThread(void *arg) {
     (void)arg;
+    
 
     char input[100];
 
@@ -355,6 +380,16 @@ void *chessGameThread(void *arg) {
     initializeBoard();
 
     while (1) {
+
+        pthread_mutex_lock(&boardMutex);
+
+        while(!isUserTurn){
+            pthread_cond_wait(&userTurnCond, &boardMutex);
+        }
+
+        pthread_mutex_unlock(&boardMutex);
+
+        pthread_mutex_lock(&boardMutex);
         // Display whose turn it is.
         printf("\n%s Turn\n", (currentTurn == WHITE ? "WHITE" : "BLACK"));
         // Print the board.
@@ -379,6 +414,18 @@ void *chessGameThread(void *arg) {
         
         // Process the input.
         processInput(input);
+
+        if(currentTurn == BLACK){
+            isUserTurn = false;
+            isStockfishTurn = true;
+
+            // Signal the Stockfish thread to start
+            pthread_cond_signal(&stockfishTurnCond);
+        }
+        pthread_mutex_unlock(&boardMutex);
+
+
+        
     }
     pthread_exit(NULL);
 }
@@ -386,9 +433,24 @@ void *chessGameThread(void *arg) {
 
 //for board state
 void copyBoardState(Piece dest[8][8]) {
+    printf("copying board\n");
+    //pthread_mutex_lock(&boardMutex);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
             dest[i][j] = board[i][j];
         }
     }
+    //pthread_mutex_lock(&boardMutex);
+}
+
+Color getCurrentTurn(){
+    return currentTurn;
+}
+
+char getCurrentTurnString(){
+    return (currentTurn == WHITE) ? 'w' : 'b';
+}
+
+void toggleCurrentTurn(){
+    currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
 }
