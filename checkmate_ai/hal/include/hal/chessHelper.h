@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <pthread.h>
 
 // Define piece types and colors.
 typedef enum { EMPTY, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING } PieceType;
@@ -28,7 +29,6 @@ extern int possible[8][8];
 extern int pieceSelected;   // 0: no piece selected, 1: a piece is in "air"
 extern int selectedRow, selectedCol;
 
-// Global variable for turn management; starting with BLACK (as in your sample).
 extern Color currentTurn;
 
 // Function prototypes.
@@ -38,3 +38,18 @@ void getPieceSymbol(Piece p, char *symbol);
 int parseCoordinate(const char *input, int *row, int *col);
 void getPossibleMoves(int r, int c);
 const char* getPieceName(Piece p);
+
+
+void *chessGameThread(void *arg);
+
+int validateInput(const char *input);
+
+void processInput(const char *input);
+
+void processPieceSelection(const char *input);
+
+void processDestination(const char *input);
+
+
+
+void copyBoardState(Piece dest[8][8]); //for board state
