@@ -1,6 +1,6 @@
 // Description: I2C module implementation.
 
-#include "hal/i2c_module.h"
+#include "i2c_module.h"
 
 #include <stdio.h>
 #include <stdlib.h>
