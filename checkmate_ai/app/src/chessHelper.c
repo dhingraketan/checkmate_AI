@@ -1,15 +1,24 @@
 #include "chessHelper.h"
 #include "sensor_game_engine_manager.h"
+<<<<<<< HEAD
 #include "BoardReader.h"
 #include <unistd.h>
+=======
+>>>>>>> 334f5df (Setup for led, buggy)
 #include "logic_led_manager.h"
 
 
 pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t userTurnCond = PTHREAD_COND_INITIALIZER;
+<<<<<<< HEAD
 // pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
 // pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
+=======
+pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
+>>>>>>> 334f5df (Setup for led, buggy)
 
 bool isStockfishTurn = false;
 bool isUserTurn = true;
@@ -492,7 +501,13 @@ void *chessGameThread(void *arg) {
             // Signal the Stockfish thread to start
             pthread_cond_signal(&stockfishTurnCond);
         }
+        else {
+            printf("making isChnageLed true in chessHelper\n");
+            isChangeLed = true;
+            pthread_cond_signal(&ledCondVar);
+        }
         pthread_mutex_unlock(&boardMutex);
+<<<<<<< HEAD
         if(pieceSelected){
             // light up possible moves
             LIGHT_UP leds[64];
@@ -510,6 +525,10 @@ void *chessGameThread(void *arg) {
         // pthread_cond_signal(&ledCondVar);
         // pthread_mutex_unlock(&ledMutex);
 
+=======
+        printf("unlocking led\n");
+        pthread_mutex_unlock(&ledMutex);
+>>>>>>> 334f5df (Setup for led, buggy)
         
     }
 
