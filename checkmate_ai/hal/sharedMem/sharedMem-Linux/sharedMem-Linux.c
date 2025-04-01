@@ -67,10 +67,16 @@ int main(void)
     //printf("    %15s: \"%s\"\n", "msg", (char*)(pR5Base + MSG_OFFSET));
     printf("    %15s: 0x%04x\n", "delay", MEM_UINT32(pR5Base + DELAY_OFFSET));
     printf("    %15s: 0x%04x\n", "bool ", MEM_UINT8(pR5Base + BOOL_OFFSET));
+    MEM_UINT32(pR5Base + DELAY_OFFSET) = 100;
     // Drive it
     for (int i = 0; true; i++) {
         // Set LED timing
         printf("here\n");
+        if(MEM_UINT8(pR5Base + BOOL_OFFSET) == 0){
+            printf("bust wait\n");
+        }
+        MEM_UINT8(pR5Base + BOOL_OFFSET) = 0;
+        printf("set it to 0\n");
         MEM_UINT32(pR5Base + DELAY_OFFSET) = (i % 10 < 5) ? 100 : 250;
 
         // Print button
