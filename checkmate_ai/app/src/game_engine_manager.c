@@ -148,8 +148,8 @@ static void * Game_engine_manager_startGameEngine(void * gameMode){
             pthread_cond_wait(&stockfishTurnCond, &boardMutex);
         }
 
-        pthread_mutex_unlock(&boardMutex);
-        pthread_mutex_lock(&boardMutex);
+        // pthread_mutex_unlock(&boardMutex);
+        // pthread_mutex_lock(&boardMutex);
 
         copyBoardState(board);
         // printf("done copying board\n");

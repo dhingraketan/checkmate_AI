@@ -14,6 +14,7 @@ static void LogicLedManager_writeColorArr(){
         for(int j = 0; j < 8; j++){
             if(possible[i][j]){
                 colorArr[indx++] = COLOR_WHITE;
+                printf("this will be lit up %d %d\n", i, j);
             }
             else {
                 colorArr[indx++] = COLOR_NONE;
@@ -25,6 +26,10 @@ static void LogicLedManager_writeColorArr(){
 static void LogicLedManager_changeColor(){
     LogicLedManager_writeColorArr();
     led_changeLedColor(colorArr);
+    printf("color arr changed to\n");
+    for(int i = 0;i<64; i++){
+        printf("%d",colorArr[i]);
+    }
 }
 
 void * LogicLedManager_makeThread(){
@@ -39,11 +44,13 @@ void * LogicLedManager_makeThread(){
             printf("[LED THREAD] woke up from cond var\n");
         }
         printf("woken up in led manager thread\n");
+
+        isChangeLed = false;
+
         // a piece is in air - get possible moves/board state
         copyPossibleMoves(possible);
         LogicLedManager_changeColor();
 
-        isChangeLed = false;
         pthread_mutex_unlock(&ledMutex);
 
     }
