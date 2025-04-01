@@ -10,20 +10,13 @@ void chessBoard_init() {
     is_initialized = true;
 }
 
-void chessBoard_getBoardState(uint8_t boardState[64]) {
+void chessBoard_getBoardState(uint8_t boardState[8][8]) {
+    
     if (!is_initialized) {
         return;
     }
 
-    for (int i = 0; i < 1; i++) {
-        uint8_t portData[16];
-        portExtender_readAllPins(i + 1, portData);
-
-        // Store pin states properly in boardState array
-        for (int j = 0; j < 16; j++) {
-            boardState[(i * 16) + j] = portData[j];
-        }
-    }
+    portExtender_readAllPins(boardState);
 }
 
 void chessBoard_cleanup() {

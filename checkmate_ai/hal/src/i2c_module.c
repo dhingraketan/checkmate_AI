@@ -28,7 +28,7 @@ int init_i2c_bus(char *bus, int address){
     }
 
     is_initialized = true;
-    printf("I2C DRV: Bus initialized\n");
+    // printf("I2C DRV: Bus initialized\n");
 
     return i2c_file_desc;
 }
@@ -73,5 +73,5 @@ uint16_t read_i2c_reg16(int i2c_file_desc, uint8_t reg_addr){
 
 void clean_up_i2c(int i2c_file_desc){
     close(i2c_file_desc);
-    is_initialized = false;
+    
 }

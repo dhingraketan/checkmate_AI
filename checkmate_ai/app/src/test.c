@@ -2,28 +2,39 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int main() {
-    uint8_t boardState[64];
+void printBoard(uint8_t state[8][8]) {
+    printf("   a   b   c   d   e   f   g   h\n");
+    printf("  +---+---+---+---+---+---+---+---+\n");
 
-    //set all boardState to 0
-    for (int i = 0; i < 64; i++) {
-        boardState[i] = 0;
+    for (int rank = 7; rank >= 0; rank--) {  // Print from rank 8 to 1
+        printf("%d |", rank + 1);
+        for (int file = 0; file < 8; file++) {
+            printf(" %c |", state[rank][file] ? 'X' : ' ');
+        }
+        printf(" %d\n", rank + 1);
+        printf("  +---+---+---+---+---+---+---+---+\n");
     }
 
-    chessBoard_init(); // Initialize MCP23017 expanders
+    printf("   a   b   c   d   e   f   g   h\n");
+}
+
+int main() {
+    
+    uint8_t boardState[8][8];
+    chessBoard_init();
+    
+    // set all boardState to 0
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            boardState[i][j] = 0;
+        }
+    }
 
     while (1) {
         chessBoard_getBoardState(boardState);
-
-        // Print board state
-        printf("Board State: \n");
-        for (int i = 0; i < 64; i++) {
-            printf("%d ", boardState[i]);
-            if ((i + 1) % 8 == 0) printf("\n");
-        }
-
-        usleep(500000); // Read every 500ms
+        printBoard(boardState);
+        usleep(10000);
     }
-
+    
     return 0;
 }
