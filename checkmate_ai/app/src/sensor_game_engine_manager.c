@@ -11,6 +11,7 @@
 #include <pthread.h>
 #include <stdatomic.h>
 #include <ctype.h>
+#include <logic_led_manager.h>
 
 #define DEFAULT_GAME_MODE GAME_MODE_BEST_MOVE
 
@@ -28,6 +29,7 @@ void * SensorGameEngineManager_init(){
     printf("here\n");
     pthread_create(&gameThread, NULL, chessGameThread, NULL); 
     Game_engine_manager_init(currGameMode);
+    LogicLedManager_init();
     while (1){};
     
     return NULL;
