@@ -399,8 +399,6 @@ void *chessGameThread(void *arg) {
     initializeBoard();
 
     while (1) {
-
-        pthread_mutex_lock(&ledMutex);
         pthread_mutex_lock(&boardMutex);
 
         while(!isUserTurn){
@@ -470,13 +468,14 @@ void *chessGameThread(void *arg) {
             pthread_cond_signal(&stockfishTurnCond);
         }
         else {
+            pthread_mutex_lock(&ledMutex);
             printf("making isChnageLed true in chessHelper\n");
             isChangeLed = true;
             pthread_cond_signal(&ledCondVar);
+            printf("unlocking led\n");
+            pthread_mutex_unlock(&ledMutex);
         }
         pthread_mutex_unlock(&boardMutex);
-        printf("unlocking led\n");
-        pthread_mutex_unlock(&ledMutex);
         
     }
     pthread_exit(NULL);
