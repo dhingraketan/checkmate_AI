@@ -32,7 +32,7 @@ static bool gameEngine_alive(pid_t pid) {
     int status;
     pid_t result = waitpid(pid, &status, WNOHANG);
 
-    printf("checking if its alive\n");
+    // printf("checking if its alive\n");
 
     if (result == 0) return true;  
 
@@ -92,12 +92,12 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
     memset(readBuffer, 0, BUFFER_SIZE);
 
     write(toEngine[1], cmdText, strlen(cmdText));
-    printf("here1\n");
+    // printf("here1\n");
 
     ssize_t bytes_read;
     // char accumulatedOutput[BUFFER_SIZE * 4] = {0};
 
-    printf("here4\n");
+    // printf("here4\n");
 
     // printf("reading\n");
     if(lookFor != NULL && lookFor[0] != '\0'){
@@ -135,27 +135,27 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine)
     if(!gameEngine_alive(pid)) return;
 
     if(cmd == CMD_GO){
-        printf("sending go cmd 1\n");
+        // printf("sending go cmd 1\n");
         snprintf(cmdText, BUFFER_SIZE, "go depth %d\n", DEFAULT_DEPTH );
         snprintf(lookForText, BUFFER_SIZE, "bestmove");
 
     }
     else if(cmd == CMD_POSITION){
-        printf("sending position cmd\n");
+        // printf("sending position cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "position fen %s\n", fenString );
         // snprintf(cmdText, BUFFER_SIZE, "isready\n");
         // snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     else if(cmd == CMD_IS_READY){
-        printf("sending is ready cmd\n");
+        // printf("sending is ready cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "isready\n");
         snprintf(cmdText, BUFFER_SIZE, "isready\n");
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
-    printf("talking\n");
+    // printf("talking\n");
 
     gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
-    printf("talking done\n");
+    // printf("talking done\n");
 
 }
 

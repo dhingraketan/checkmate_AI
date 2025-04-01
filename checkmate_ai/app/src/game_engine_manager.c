@@ -152,7 +152,7 @@ static void * Game_engine_manager_startGameEngine(void * gameMode){
         pthread_mutex_lock(&boardMutex);
 
         copyBoardState(board);
-        printf("done copying board\n");
+        // printf("done copying board\n");
         // printBoard(board);
         SensorGameEngineManager_getFenString(board);
 
@@ -163,10 +163,10 @@ static void * Game_engine_manager_startGameEngine(void * gameMode){
         gameEngine_sendCmd(CMD_POSITION, boadStateFenString,returnLine);
         memset(returnLine, 0, MAX_FEN_STRING_LEN);
         // get the best move
-        printf("sending go cmd\n");
+        // printf("sending go cmd\n");
         gameEngine_sendCmd(CMD_GO, NULL,returnLine);
 
-        printf("Bestmove found %s\n ", returnLine);
+        printf("Bestmove found by Stockfish %s\n ", returnLine);
         Game_engine_manager_parseOutput(returnLine, from, to);
 
         printf("from: %s, to: %s\n", from, to);

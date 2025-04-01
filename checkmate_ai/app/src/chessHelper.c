@@ -473,7 +473,7 @@ void *chessGameThread(void *arg) {
 
 //for board state
 void copyBoardState(Piece dest[8][8]) {
-    printf("copying board\n");
+    // printf("copying board\n");
     //pthread_mutex_lock(&boardMutex);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
