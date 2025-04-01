@@ -120,6 +120,7 @@ int main(void)
 
 		// Wait for delay (set by Linux app)
 		uint32_t delay = MEM_UINT32(DELAY_OFFSET);
+		MEM_UINT8(BOOL_OFFSET)  = 1;
 		printf("Waiting for %d ms\n", delay);
 		k_busy_wait(delay * MICRO_SECONDS_PER_MILI_SECOND);	
 	}
