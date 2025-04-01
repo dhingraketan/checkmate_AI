@@ -79,14 +79,3 @@
     
 //     return 0;
 // }
-
-#include "GameController.h"
-#include "LCDPrinter.h"
-#include "BoardReader.h"
-
-int main(){
-    boardReader_init();
-    lcd_printer_init();
-    GameController_init();
-    GameController_cleanup();
-}
