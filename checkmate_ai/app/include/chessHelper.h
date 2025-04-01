@@ -39,10 +39,10 @@ void processPieceSelection(const char *input);
 
 void processDestination(const char *input);
 
-
-
 void copyBoardState(Piece dest[8][8]); //for board state
 
 char getCurrentTurnString();
 
 void toggleCurrentTurn();
+
+void copyPossibleMoves(int dest[8][8]);

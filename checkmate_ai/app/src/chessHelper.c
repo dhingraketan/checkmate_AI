@@ -2,13 +2,19 @@
 #include "sensor_game_engine_manager.h"
 #include "BoardReader.h"
 #include <unistd.h>
+#include "logic_led_manager.h"
 
 
 pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t userTurnCond = PTHREAD_COND_INITIALIZER;
+pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
+
 bool isStockfishTurn = false;
 bool isUserTurn = true;
+bool isChangeLed = false;
+
 
 static Piece board[8][8];
 static int possible[8][8];
@@ -394,6 +400,7 @@ void *chessGameThread(void *arg) {
 
     while (1) {
 
+        pthread_mutex_lock(&ledMutex);
         pthread_mutex_lock(&boardMutex);
 
         while(!isUserTurn){
@@ -462,9 +469,14 @@ void *chessGameThread(void *arg) {
             // Signal the Stockfish thread to start
             pthread_cond_signal(&stockfishTurnCond);
         }
+        else {
+            printf("making isChnageLed true in chessHelper\n");
+            isChangeLed = true;
+            pthread_cond_signal(&ledCondVar);
+        }
         pthread_mutex_unlock(&boardMutex);
-
-
+        printf("unlocking led\n");
+        pthread_mutex_unlock(&ledMutex);
         
     }
     pthread_exit(NULL);
@@ -481,6 +493,15 @@ void copyBoardState(Piece dest[8][8]) {
         }
     }
     //pthread_mutex_lock(&boardMutex);
+}
+
+//for possible array
+void copyPossibleMoves(int dest[8][8]) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            dest[i][j] = possible[i][j];
+        }
+    }
 }
 
 Color getCurrentTurn(){
