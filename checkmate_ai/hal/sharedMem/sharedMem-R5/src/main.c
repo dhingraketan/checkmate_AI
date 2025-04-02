@@ -254,8 +254,8 @@ int main(void)
 		gpio_pin_set_dt(&neopixel, 0);
 		NEO_DELAY_RESET();
 
-		// k_busy_wait(delay * MICRO_SECONDS_PER_MILI_SECOND);	
-		
+		// k_busy_wait(1 * 1000);
+		// k_msleep(500);
 		
 		// k_busy_wait(1 * MICRO_SECONDS_PER_MILI_SECOND);
 		// uint32_t myColor = (flag == 0) ? 0x0f000000 : 0x000f0000;
