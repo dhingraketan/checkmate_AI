@@ -9,4 +9,4 @@ ${CMAKE_CURRENT_SOURCE_DIR}/sharedMem/sharedMem-Linux/sharedMem-Linux.c)
 
 add_library(hal STATIC ${MY_SOURCES})
 
-target_include_directories(hal PUBLIC include  ${CMAKE_CURRENT_SOURCE_DIR}/sharedMem/sharedMem-Linux/include)
+target_include_directories(hal PUBLIC include  ${CMAKE_CURRENT_SOURCE_DIR}/sharedMem/sharedMem-Linux/)
