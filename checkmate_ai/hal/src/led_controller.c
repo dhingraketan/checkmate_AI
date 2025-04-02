@@ -40,8 +40,8 @@ void led_changeLedColor(int *colorArr){
     for(int i = 0; i< NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
-    for(int i = 0; i< NUM_LEDS; i++){
-        printf("changed colorArr[%d]: 0x%08x\n", i, colors[i]);
-    }  
+    // for(int i = 0; i< NUM_LEDS; i++){
+    //     printf("changed colorArr[%d]: 0x%08x\n", i, colors[i]);
+    // }  
     sharedMem_changeLed(colors);
 }
