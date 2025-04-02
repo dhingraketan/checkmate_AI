@@ -58,13 +58,13 @@ void sharedMem_cleanup(){
 void sharedMem_changeLed(int32_t *colorArr){
     printf("changing shared mem\n");
     for(int i = 0; i<64; i++){
-        MEM_UINT32(pR5Base + ARR_OFFSET + i) = colorArr[i];
+        MEM_UINT32((uint8_t*)pR5Base + ARR_OFFSET + i* sizeof(uint32_t)) = colorArr[i];
     }
-    MEM_UINT8(pR5Base+ BOOL_OFFSET) = 1;
+    MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
 
 }
 
-int main(void)
+int main1(void)
 {
     printf("Sharing memory with R5\n");
     printf("  LED should change speed every 5s.\n");
@@ -88,7 +88,7 @@ int main(void)
     // printf("    %15s: 0x%04x\n", "bool ", MEM_UINT8(pR5Base + BOOL_OFFSET));
 
 
-    MEM_UINT32(pR5Base + DELAY_OFFSET) = 100;
+    MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET) = 100;
     // Drive it
     for (int i = 0; true; i++) {
         // Set LED timing
@@ -104,7 +104,6 @@ int main(void)
         // printf("Loop Count: %7d\n", 
         //     MEM_UINT32(pR5Base + LOOP_COUNT_OFFSET)
         // );
-        MEM_UINT8(pR5Base + BOOL_OFFSET) = !MEM_UINT8(pR5Base + BOOL_OFFSET);
 
         // Timing
         sleep(1);
