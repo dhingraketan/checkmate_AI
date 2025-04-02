@@ -3,6 +3,7 @@
     "files.associations": {
         "shareddatalayout.h": "c",
         "led.h": "c",
-        "shareddatalayoutlinux.h": "c"
+        "shareddatalayoutlinux.h": "c",
+        "led_controller.h": "c"
     }
 }

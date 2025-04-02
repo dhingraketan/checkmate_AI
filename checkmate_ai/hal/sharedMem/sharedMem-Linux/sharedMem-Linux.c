@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <assert.h>
 
 #include <string.h>
 
@@ -16,7 +17,7 @@
 #define MEM_LENGTH    0x8000
 
 static volatile void *pR5Base;
-
+static bool isInit = false;
 // Return the address of the base address of the ATCM memory region for the R5-MCU
 volatile void* getR5MmapAddr(void)
 {
@@ -49,13 +50,16 @@ void freeR5MmapAddr()
 
 void sharedMem_init(){
     printf("init sharedmem\n");
+    isInit = true;
     pR5Base = getR5MmapAddr();
 }
 
 void sharedMem_cleanup(){
+    assert(isInit);
     freeR5MmapAddr();
 }
 void sharedMem_changeLed(int32_t *colorArr){
+    assert(isInit);
     printf("changing shared mem\n");
     for(int i = 0; i<64; i++){
         MEM_UINT32((uint8_t*)pR5Base + ARR_OFFSET + i* sizeof(uint32_t)) = colorArr[i];
