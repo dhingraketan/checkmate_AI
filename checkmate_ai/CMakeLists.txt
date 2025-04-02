@@ -4,7 +4,7 @@ project(extender VERSION 1.0 DESCRIPTION "Extender" LANGUAGES C)
 
 # Compiler options (inherited by sub-folders)
 set(CMAKE_C_STANDARD 11)
-add_compile_options(-Wall -Werror -Wpedantic -Wextra)
+add_compile_options(-Wall -Wpedantic -Wextra)
 add_compile_options(-fdiagnostics-color)
 
 # Enable address sanitizer

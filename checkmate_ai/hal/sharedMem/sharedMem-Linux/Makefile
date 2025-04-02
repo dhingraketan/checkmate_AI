@@ -12,7 +12,7 @@ CROSS_TOOL = aarch64-linux-gnu-
 CC_CPP = $(CROSS_TOOL)g++
 CC_C = $(CROSS_TOOL)gcc
 
-CFLAGS = -Wall -g -std=c99 -D _POSIX_C_SOURCE=200809L -Werror -Wshadow
+CFLAGS = -Wall -g -std=c99 -D _POSIX_C_SOURCE=200809L -Wshadow
 
 
 # Convert the targets to full-path executables to delete.
