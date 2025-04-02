@@ -65,6 +65,7 @@ void sharedMem_changeLed(int32_t *colorArr){
         MEM_UINT32((uint8_t*)pR5Base + ARR_OFFSET + i* sizeof(uint32_t)) = colorArr[i];
     }
     MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
+    printf("got loop count from r5 %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET));
 
 }
 

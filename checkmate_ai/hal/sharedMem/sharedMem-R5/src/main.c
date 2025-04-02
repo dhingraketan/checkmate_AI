@@ -77,7 +77,7 @@ static void initialize_gpio(const struct gpio_dt_spec *pPin, int direction)
 }
 
 
-int main1(void)
+int main(void)
 {
 	printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
 
@@ -120,21 +120,23 @@ int main1(void)
 	// }
 
 
-	// bool led_state = true;
+	bool led_state = true;
 	// uint32_t btnCount = 0;
-	// uint32_t loopCount = 0;
+	uint32_t loopCount = 0;
 
 	while (true) {
 		// // Toggle LED
-		// printf("LED state: %s\n", led_state ? "OFF" : "ON");
-		// if (gpio_pin_toggle_dt(&led) < 0) {
-		// 	printf("ERROR: GPIO Pin Toggle DT\n");
-		// 	return 0;
-		// }
-		// led_state = !led_state;
+		printf("LED state: %s\n", led_state ? "OFF" : "ON");
+		if (gpio_pin_toggle_dt(&led) < 0) {
+			printf("ERROR: GPIO Pin Toggle DT\n");
+			return 0;
+		}
+		led_state = !led_state;
 
 		while(MEM_UINT8(BOOL_OFFSET) == 0){
-				printf("busy wait in r5");
+			loopCount++;
+			MEM_UINT32(LOOP_COUNT_OFFSET) = loopCount;
+			printf("busy wait in r5");
 		}
 		uint32_t *color;
 
