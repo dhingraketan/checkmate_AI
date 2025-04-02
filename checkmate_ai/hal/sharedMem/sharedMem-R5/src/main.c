@@ -109,6 +109,7 @@ int main(void)
 		// MEM_UINT32((((uint8_t*)pSharedMem )+ ARR_OFFSET) + (i * sizeof(uint32_t))) = 0x0f000000;
 		uint32_t *addr = (((uint8_t*)pSharedMem )+ ARR_OFFSET) + (i * sizeof(uint32_t));
 		MEM_UINT32(addr) = 0x0f000000;
+		// MEM_UINT32(addr) = 0x00000000;
 		// *addr = 0x0f000000;
 		// *addr = 0x00000000;
 	}
@@ -192,8 +193,8 @@ int main(void)
 		for(int i = 0; i< NEO_NUM_LEDS; i++){
 
 			int32_t *addr = ((uint8_t*)pSharedMem +ARR_OFFSET) + (i* sizeof(uint32_t));
-			// int32_t *addr2 = addr + (i* sizeof(uint32_t));
-			// int32_t colorGreen = MEM_UINT32(addr2);
+			// // int32_t *addr2 = addr + (i* sizeof(uint32_t));
+			// // int32_t colorGreen = MEM_UINT32(addr2);
 			int32_t colorGreen = *addr;
 			color[i] = colorGreen;
 
