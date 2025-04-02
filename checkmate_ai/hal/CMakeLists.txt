@@ -3,10 +3,13 @@
 #   Use header as: #include "hal/button.h"
 
 include_directories(hal/include)
-file(GLOB MY_SOURCES "src/*.c")
+file(GLOB MY_SOURCES "src/*.c"
+${CMAKE_CURRENT_SOURCE_DIR}/sharedMem/sharedMem-Linux/sharedMem-Linux.c)
+
 
 add_library(hal STATIC ${MY_SOURCES})
 
 target_include_directories(hal PUBLIC include)
 target_link_libraries(hal LINK_PRIVATE lgpio)
 target_link_libraries(hal LINK_PRIVATE gpiod)
+target_include_directories(hal PUBLIC include  ${CMAKE_CURRENT_SOURCE_DIR}/sharedMem/sharedMem-Linux/include)

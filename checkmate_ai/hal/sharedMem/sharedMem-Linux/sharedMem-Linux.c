@@ -15,6 +15,8 @@
 #define BTCM_ADDR     0x79020000  // MCU BTCM (p59 TRM)
 #define MEM_LENGTH    0x8000
 
+static volatile void *pR5Base;
+
 // Return the address of the base address of the ATCM memory region for the R5-MCU
 volatile void* getR5MmapAddr(void)
 {
@@ -27,7 +29,7 @@ volatile void* getR5MmapAddr(void)
 
     // Inside main memory (fd), access the part at offset BTCM_ADDR:
     // (Get points to start of R5 memory after it's memory mapped)
-    volatile void* pR5Base = mmap(0, MEM_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, fd, BTCM_ADDR);
+    pR5Base = mmap(0, MEM_LENGTH, PROT_READ | PROT_WRITE, MAP_SHARED, fd, BTCM_ADDR);
     if (pR5Base == MAP_FAILED) {
         perror("ERROR: could not map memory");
         exit(EXIT_FAILURE);
@@ -37,12 +39,29 @@ volatile void* getR5MmapAddr(void)
     return pR5Base;
 }
 
-void freeR5MmapAddr(volatile void* pR5Base)
+void freeR5MmapAddr()
 {
     if (munmap((void*) pR5Base, MEM_LENGTH)) {
         perror("R5 munmap failed");
         exit(EXIT_FAILURE);
     }
+}
+
+void sharedMem_init(){
+    printf("init sharedmem\n");
+    pR5Base = getR5MmapAddr();
+}
+
+void sharedMem_cleanup(){
+    freeR5MmapAddr();
+}
+void sharedMem_changeLed(int32_t *colorArr){
+    printf("changing shared mem\n");
+    for(int i = 0; i<64; i++){
+        MEM_UINT32(pR5Base + ARR_OFFSET + i) = colorArr[i];
+    }
+    MEM_UINT8(pR5Base+ BOOL_OFFSET) = 1;
+
 }
 
 int main(void)
