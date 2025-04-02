@@ -15,7 +15,7 @@
 #define ATCM_ADDR     0x79000000  // MCU ATCM (p59 TRM)
 #define BTCM_ADDR     0x79020000  // MCU BTCM (p59 TRM)
 #define MEM_LENGTH    0x8000
-#define NEO_NUM_LEDS      8
+#define NEO_NUM_LEDS      64
 
 static volatile void *pR5Base;
 static bool isInit = false;
@@ -53,6 +53,7 @@ void sharedMem_init(){
     printf("init sharedmem\n");
     isInit = true;
     pR5Base = getR5MmapAddr();
+    
 }
 
 void sharedMem_cleanup(){
@@ -60,50 +61,48 @@ void sharedMem_cleanup(){
     freeR5MmapAddr();
 }
 void sharedMem_changeLed(uint32_t *colorArr){
-    // uint32_t color[8] = {
-    //         0x0f000000, // Green
-    //         0x000f0000, // Red
-    //         0x00000f00, // Blue
-    //         0x0000000f, // White
-    //         0x0f0f0f00, // White (via RGB)
-    //         0x0f0f0000, // Yellow
-    //         0x000f0f00, // Purple
-    //         0x0f000f00, // Teal
-    //     };
-
-    // colorArr[0] = color[0];
-      
-    // *colorArr = color;
-    assert(isInit);
     printf("changing shared mem\n");
-    // while( MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) == 1){}
+
+    printf("Contents of memory :\n");
+	// for (int i = 0; i < 50; i++) {
+	// 	volatile char* addr =(volatile char*) pR5Base + i;
+    //     char val = *addr;
+    //     printf("Offset %d = %3d (char '%c')\n", i, val, val);
+	// }
+    // while( MEM_UINT32((uint8_t*)pR5Base+ BOOL_OFFSET) == 1){}
 
     for(int i = 0; i< NEO_NUM_LEDS; i++){
-
-        uint32_t addr_offset = ARR_OFFSET + (i * sizeof(uint32_t));
-    
-        if (addr_offset + sizeof(uint32_t) > MEM_LENGTH) {
-            fprintf(stderr, "Out-of-bounds access attempt at index %d\n", i);
-            exit(EXIT_FAILURE);
-        }
         
-        uint32_t write_val = colorArr[i];
+        // uint32_t write_val = colorArr[i];
+        uint32_t write_val = 0x0f000000;
+
+
+        // MEM_UINT32((((uint8_t*)pR5Base )+ ARR_OFFSET) + (i * sizeof(uint32_t))) = 0;
+      
         // uint32_t write_val = color[i];
         // uint32_t write_val2 = colorArr[i];
-        uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+        // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+        int32_t *addr = ((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t));
+        MEM_UINT32(addr) = write_val;
 
-        MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
-        uint32_t read_val2 = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+        // MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
+
+
+        uint32_t read_val2 = MEM_UINT32(addr);
         // uint8_t r = (write_val >> 24) & 0xFF;
         // uint8_t g = (write_val >> 16) & 0xFF;
         // uint8_t b = (write_val >> 8) & 0xFF;
+        // 
+
+        printf("%5d | 0x%08x |  0x%08x \n", 
+        i, write_val, read_val2);
+
     
-        printf("%5d | 0x%08x | 0x%08x  | 0x%08x  \n", 
-            i, read_val, write_val, read_val2);
+        // printf("%5d | 0x%08x | 0x%08x  | 0x%08x\n", 
+        //     i, read_val, write_val, read_val2);
 
     }
-        
-    MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
+    MEM_UINT32((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
     printf("got loop count from r5 %d %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET),
     MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET));
 
@@ -116,7 +115,7 @@ int main1(void)
     printf("  Press the button to see its state here.\n");
 
     // Get access to shared memory for my uses
-    pR5Base = getR5MmapAddr();
+    // pR5Base = getR5MmapAddr();
 
 	// printf("Contents of memory :\n");
 	// for (int i = 0; i < 50; i++) {
@@ -133,15 +132,16 @@ int main1(void)
     // printf("    %15s: 0x%04x\n", "bool ", MEM_UINT8(pR5Base + BOOL_OFFSET));
 
 
-    MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET) = 100;
+    // MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET) = 100;
     // Drive it
     for (int i = 0; true; i++) {
         // Set LED timing
         printf("here\n");
-        // if(MEM_UINT8(pR5Base + BOOL_OFFSET) == 0){
+        
+        // if(MEM_UINT32(pR5Base + BOOL_OFFSET) == 0){
         //     printf("bust wait\n");
         // }
-        // MEM_UINT8(pR5Base + BOOL_OFFSET) = 0;
+        // MEM_UINT32(pR5Base + BOOL_OFFSET) = 0;
         // printf("set it to 0\n");
         // MEM_UINT32(pR5Base + DELAY_OFFSET) = (i % 10 < 5) ? 100 : 250;
 
@@ -155,5 +155,5 @@ int main1(void)
     }
 
     // Cleanup
-    freeR5MmapAddr();
+    // freeR5MmapAddr();
 }

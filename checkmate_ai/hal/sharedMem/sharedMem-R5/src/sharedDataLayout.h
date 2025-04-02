@@ -11,11 +11,11 @@
 
 
 #define MSG_OFFSET 0
-#define MSG_SIZE   32
+#define MSG_SIZE   32 
 #define COUNT_OFFSET (MSG_OFFSET + MSG_SIZE)
 #define DELAY_OFFSET (COUNT_OFFSET + sizeof(uint32_t))
 #define BOOL_OFFSET (DELAY_OFFSET + sizeof(uint32_t))
-#define LOOP_COUNT_OFFSET     (BOOL_OFFSET + sizeof(uint8_t) + 3)  
+#define LOOP_COUNT_OFFSET     (BOOL_OFFSET + sizeof(uint32_t))  
 #define ARR_OFFSET (LOOP_COUNT_OFFSET + sizeof(uint32_t))
 #define ARR_SIZE   (64 * sizeof(uint32_t))
 #define END_MEMORY_OFFSET (ARR_OFFSET + ARR_SIZE)
