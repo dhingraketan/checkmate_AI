@@ -16,7 +16,7 @@ typedef enum {
 
 typedef struct {
     LED_COLOR_NAME colorName;
-    int32_t colorHex;
+    uint32_t colorHex;
 } LED_Color;
 
 

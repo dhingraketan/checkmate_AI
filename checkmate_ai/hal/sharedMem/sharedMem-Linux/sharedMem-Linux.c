@@ -58,14 +58,44 @@ void sharedMem_cleanup(){
     assert(isInit);
     freeR5MmapAddr();
 }
-void sharedMem_changeLed(int32_t *colorArr){
+void sharedMem_changeLed(uint32_t *colorArr){
+    uint32_t color[8] = {
+            0x0f000000, // Green
+            0x000f0000, // Red
+            0x00000f00, // Blue
+            0x0000000f, // White
+            0x0f0f0f00, // White (via RGB)
+            0x0f0f0000, // Yellow
+            0x000f0f00, // Purple
+            0x0f000f00, // Teal
+        };
+
+    // colorArr[0] = color[0];
+      
+    // *colorArr = color;
     assert(isInit);
     printf("changing shared mem\n");
-    for(int i = 0; i<64; i++){
-        MEM_UINT32((uint8_t*)pR5Base + ARR_OFFSET + i* sizeof(uint32_t)) = colorArr[i];
+
+    for(int i = 0; i<8; i++){
+        // uint32_t write_val = colorArr[i];
+        uint32_t write_val = color[i];
+        uint32_t write_val2 = colorArr[i];
+
+        MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
+        // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+        uint8_t r = (write_val >> 24) & 0xFF;
+        uint8_t g = (write_val >> 16) & 0xFF;
+        uint8_t b = (write_val >> 8) & 0xFF;
+    
+        printf("%5d | 0x%08x | 0x%08x | %3d %3d %3d %08x %s  \n", 
+            i, write_val, write_val, r, g, b,write_val2,
+            (write_val == 0) ? "!!MISMATCH!!" : "");
+
     }
-    MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
-    printf("got loop count from r5 %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET));
+        
+    // MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
+    printf("got loop count from r5 %d %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET),
+    MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET));
 
 }
 

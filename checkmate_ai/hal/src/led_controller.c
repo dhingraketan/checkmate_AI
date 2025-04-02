@@ -19,7 +19,7 @@ static LED_Color colorInfo[6] = {
 
 };
 
-static int32_t colors[NUM_LEDS] = {0x0};
+static uint32_t colors[NUM_LEDS] = {0x0};
 
 void led_init(){
     isInit = true;
@@ -36,9 +36,12 @@ void led_cleanup(){
 void led_changeLedColor(int *colorArr){
     assert(isInit);
 
-    printf("isnide led change color\n");
+    printf("inside led change color\n");
     for(int i = 0; i< NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
-    sharedMem_changeLed(colorArr);
+    for(int i = 0; i< NUM_LEDS; i++){
+        printf("changed colorArr[%d]: 0x%08x\n", i, colors[i]);
+    }  
+    sharedMem_changeLed(colors);
 }

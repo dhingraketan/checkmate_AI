@@ -24,5 +24,5 @@
 
 void sharedMem_init();
 void sharedMem_cleanup();
-void sharedMem_changeLed(int32_t *colorArr);
+void sharedMem_changeLed(uint32_t *colorArr);
 #endif

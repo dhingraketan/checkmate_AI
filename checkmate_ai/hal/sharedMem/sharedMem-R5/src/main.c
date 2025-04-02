@@ -10,7 +10,7 @@
 
 #include "sharedDataLayout.h"
 
-#define NEO_NUM_LEDS          64   // # LEDs in our string
+#define NEO_NUM_LEDS          8   // # LEDs in our string
 #define DELAY_TIME_uS   (500 * 1000)
 
 
@@ -110,8 +110,9 @@ int main(void)
 	// 	printf("0x%08x = %2x (%c)\n", (uint32_t) addr, *addr, *addr);
 	// }
 
-	// MEM_UINT32(DELAY_OFFSET) = DEFAULT_LED_DELAY_MS;
-	// MEM_UINT32(LOOP_COUNT_OFFSET) = 0;
+	MEM_UINT32(DELAY_OFFSET) = 0;
+	MEM_UINT32(LOOP_COUNT_OFFSET) = 0;
+	MEM_UINT8(BOOL_OFFSET) = 0;
 	
 	// printf("Contents of Shared Memory ATCM After Write:\n");
 	// for (int i = 0; i < END_MEMORY_OFFSET; i++) {
@@ -121,31 +122,54 @@ int main(void)
 
 
 	bool led_state = true;
-	// uint32_t btnCount = 0;
+	uint32_t outsideLoopCount = 0;
 	uint32_t loopCount = 0;
+	uint32_t color[NEO_NUM_LEDS] = {0};
+
+	// uint32_t color[8] = {
+    //     0x0f000000, // Green
+    //     0x000f0000, // Red
+    //     0x00000f00, // Blue
+    //     0x0000000f, // White
+    //     0x0f0f0f00, // White (via RGB)
+    //     0x0f0f0000, // Yellow
+    //     0x000f0f00, // Purple
+    //     0x0f000f00, // Teal
+    // };  
 
 	while (true) {
 		// // Toggle LED
-		printf("LED state: %s\n", led_state ? "OFF" : "ON");
-		if (gpio_pin_toggle_dt(&led) < 0) {
-			printf("ERROR: GPIO Pin Toggle DT\n");
-			return 0;
-		}
-		led_state = !led_state;
+		// printf("LED state: %s\n", led_state ? "OFF" : "ON");
+		// if (gpio_pin_toggle_dt(&led) < 0) {
+		// 	printf("ERROR: GPIO Pin Toggle DT\n");
+		// 	return 0;
+		// }
+		// led_state = !led_state;
 
-		while(MEM_UINT8(BOOL_OFFSET) == 0){
-			loopCount++;
-			MEM_UINT32(LOOP_COUNT_OFFSET) = loopCount;
-			printf("busy wait in r5");
-		}
-		uint32_t *color;
+		// while(MEM_UINT8(BOOL_OFFSET) == 0){}
 
-		if(MEM_UINT8(BOOL_OFFSET) == 1){
-			for(int i = 0; i<64; i++){
-				color[i] = MEM_UINT32(ARR_OFFSET + i * sizeof(uint32_t));
-			}
+		// 	loopCount++;
+		// 	MEM_UINT32(LOOP_COUNT_OFFSET) = loopCount;
+		// 	printf("busy wait in r5");
+		// // uint32_t color[NEO_NUM_LEDS];
+		// outsideLoopCount++;
+		// MEM_UINT32(DELAY_OFFSET) = outsideLoopCount;
+
+
+		for(int i = 0; i<NEO_NUM_LEDS; i++){
+			// uint32_t write_val = color[i];
+			// MEM_UINT32((ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
+
+			color[i] = MEM_UINT32((ARR_OFFSET) + (i * sizeof(uint32_t)));
+
+			// color[i] = MEM_UINT32((ARR_OFFSET + (i * sizeof(uint32_t))));
 		}
+		// color[0] = MEM_UINT32(((uint8_t*)pSharedMem + ARR_OFFSET) + (0 * sizeof(uint32_t)));
+
 		MEM_UINT8(BOOL_OFFSET) = 0;
+
+		strcpy((char*) MSG_OFFSET, "Hello");
+
 
 		gpio_pin_set_dt(&neopixel, 0);
 			
