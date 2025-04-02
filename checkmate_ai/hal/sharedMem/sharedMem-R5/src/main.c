@@ -76,6 +76,16 @@ static void initialize_gpio(const struct gpio_dt_spec *pPin, int direction)
 	}
 }
 
+static void changeAll(uint32_t myColor){
+	for (int i = 0; i < NEO_NUM_LEDS; i++) {
+		// MEM_UINT32((((uint8_t*)pSharedMem )+ ARR_OFFSET) + (i * sizeof(uint32_t))) = 0x0f000000;
+		uint32_t *addr = (((uint8_t*)pSharedMem )+ ARR_OFFSET) + (i * sizeof(uint32_t));
+		MEM_UINT32(addr) = myColor;
+		// MEM_UINT32(addr) = 0x00000000;
+		// *addr = 0x0f000000;
+		// *addr = 0x00000000;
+	}
+}
 
 int main(void)
 {
@@ -146,6 +156,7 @@ int main(void)
 	gpio_pin_set_dt(&neopixel, 0);
 	NEO_DELAY_RESET();
 	int tick = 0;
+	bool flag = 0;
 
 	while (true) {
 		// // Toggle LED
@@ -195,7 +206,7 @@ int main(void)
 			int32_t *addr = ((uint8_t*)pSharedMem +ARR_OFFSET) + (i* sizeof(uint32_t));
 			// // int32_t *addr2 = addr + (i* sizeof(uint32_t));
 			// // int32_t colorGreen = MEM_UINT32(addr2);
-			int32_t colorGreen = *addr;
+			int32_t colorGreen = MEM_UINT32(addr);
 			color[i] = colorGreen;
 
 
@@ -243,13 +254,13 @@ int main(void)
 		gpio_pin_set_dt(&neopixel, 0);
 		NEO_DELAY_RESET();
 
-
-
 		// k_busy_wait(delay * MICRO_SECONDS_PER_MILI_SECOND);	
 		
 		
-		k_busy_wait(1 * MICRO_SECONDS_PER_MILI_SECOND);
-		tick +=1;
+		// k_busy_wait(1 * MICRO_SECONDS_PER_MILI_SECOND);
+		// uint32_t myColor = (flag == 0) ? 0x0f000000 : 0x000f0000;
+		// changeAll(myColor);
+		// flag = !flag;
 	}
 	return 0;
 }
