@@ -12,6 +12,7 @@
 #include <stdatomic.h>
 #include <ctype.h>
 #include <logic_led_manager.h>
+#include <assert.h>
 
 #define DEFAULT_GAME_MODE GAME_MODE_BEST_MOVE
 
@@ -37,6 +38,7 @@ void * SensorGameEngineManager_init(){
 }
 
 void SensorGameEngineManager_cleanup(){
+    // assert(isInit);
     // pthread_join(gameThread, NULL);
 
     printf("here3\n");

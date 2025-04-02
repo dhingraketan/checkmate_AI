@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "stdbool.h"
 #include "sharedDataLayoutLinux.h"
+#include <assert.h>
 
 #define NUM_LEDS 64
 
@@ -22,15 +23,19 @@ static int32_t colors[NUM_LEDS] = {0x0};
 
 void led_init(){
     isInit = true;
+    sharedMem_init();
    
 }
 
 void led_cleanup(){
+    assert(isInit);
     isInit = false;
 }
 
 // changes the color and triggers R5 to light up LED
 void led_changeLedColor(int *colorArr){
+    assert(isInit);
+
     printf("isnide led change color\n");
     for(int i = 0; i< NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;

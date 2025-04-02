@@ -2,13 +2,15 @@
 #include "led_controller.h"
 #include "chessHelper.h"
 #include "pthread.h"
-
+#include "assert.h"
 static bool isInit = false;
 static int possible[8][8];
 static int colorArr[64];
 static pthread_t threadId;
 
 static void LogicLedManager_writeColorArr(){
+    assert(isInit);
+
     int indx = 0;
     for(int i = 0; i < 8; i++){
         for(int j = 0; j < 8; j++){
@@ -24,6 +26,8 @@ static void LogicLedManager_writeColorArr(){
 }
 
 static void LogicLedManager_changeColor(){
+    assert(isInit);
+
     LogicLedManager_writeColorArr();
     led_changeLedColor(colorArr);
     printf("color arr changed to\n");
@@ -33,6 +37,8 @@ static void LogicLedManager_changeColor(){
 }
 
 void * LogicLedManager_makeThread(){
+    assert(isInit);
+    
     printf("made led thread\n");
     while(1){
         printf("trying to get the lock\n");
@@ -69,6 +75,8 @@ void LogicLedManager_init(){
 
 
 void LogicLedManager_cleanup(){
+    assert(isInit);
+
     isInit = false;
     printf("cleanup led\n");
 
