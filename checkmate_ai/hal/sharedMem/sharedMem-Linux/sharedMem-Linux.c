@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-#include "sharedDataLayout.h"
+#include "sharedDataLayoutLinux.h"
 
 // General R5 Memomry Sharing Routine
 // ----------------------------------------------------------------
@@ -110,5 +110,5 @@ int main1(void)
     }
 
     // Cleanup
-    freeR5MmapAddr(pR5Base);
+    freeR5MmapAddr();
 }

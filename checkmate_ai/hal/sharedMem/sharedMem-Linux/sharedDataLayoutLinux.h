@@ -1,5 +1,5 @@
-#ifndef _SHARED_DATA_STRUCT_H_
-#define _SHARED_DATA_STRUCT_H_
+#ifndef _SHARED_DATA_STRUCT_LINUX_H_
+#define _SHARED_DATA_STRUCT_LINUX_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -24,5 +24,5 @@
 
 void sharedMem_init();
 void sharedMem_cleanup();
-void sharedMem_changeLed();
+void sharedMem_changeLed(int32_t *colorArr);
 #endif

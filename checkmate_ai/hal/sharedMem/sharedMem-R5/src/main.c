@@ -140,7 +140,7 @@ int main1(void)
 
 		if(MEM_UINT8(BOOL_OFFSET) == 1){
 			for(int i = 0; i<64; i++){
-				color[i] = MEM_UINT32(ARR_OFFSET + i)
+				color[i] = MEM_UINT32(ARR_OFFSET + i * sizeof(uint32_t));
 			}
 		}
 		MEM_UINT8(BOOL_OFFSET) = 0;
