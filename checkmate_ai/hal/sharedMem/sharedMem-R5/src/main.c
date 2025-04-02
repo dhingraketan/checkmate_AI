@@ -10,7 +10,7 @@
 
 #include "sharedDataLayout.h"
 
-#define NEO_NUM_LEDS          64   // # LEDs in our string
+#define NEO_NUM_LEDS          64  // # LEDs in our string
 #define DELAY_TIME_uS   (500 * 1000)
 
 
@@ -125,6 +125,7 @@ int main(void)
 	uint32_t outsideLoopCount = 0;
 	uint32_t loopCount = 0;
 	uint32_t color[NEO_NUM_LEDS] = {0};
+	bool valuesGiven = false;
 
 	// uint32_t color[8] = {
     //     0x0f000000, // Green
@@ -136,6 +137,8 @@ int main(void)
     //     0x000f0f00, // Purple
     //     0x0f000f00, // Teal
     // };  
+	gpio_pin_set_dt(&neopixel, 0);
+	NEO_DELAY_RESET();
 
 	while (true) {
 		// // Toggle LED
@@ -154,19 +157,27 @@ int main(void)
 		// // uint32_t color[NEO_NUM_LEDS];
 		// outsideLoopCount++;
 		// MEM_UINT32(DELAY_OFFSET) = outsideLoopCount;
+		valuesGiven = false;
 
 
 		for(int i = 0; i<NEO_NUM_LEDS; i++){
 			// uint32_t write_val = color[i];
 			// MEM_UINT32((ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
 
-			color[i] = MEM_UINT32((ARR_OFFSET) + (i * sizeof(uint32_t)));
+			color[i] = MEM_UINT32(((uint8_t*)pSharedMem +ARR_OFFSET) + (i * sizeof(uint32_t)));
+			if (color[i] != 0) {
+				valuesGiven = true;
+			}
 
 			// color[i] = MEM_UINT32((ARR_OFFSET + (i * sizeof(uint32_t))));
 		}
 		// color[0] = MEM_UINT32(((uint8_t*)pSharedMem + ARR_OFFSET) + (0 * sizeof(uint32_t)));
 
-		MEM_UINT8(BOOL_OFFSET) = 0;
+		// MEM_UINT8(BOOL_OFFSET) = 0;
+
+		if(!valuesGiven){
+			continue;
+		}
 
 		strcpy((char*) MSG_OFFSET, "Hello");
 

@@ -76,6 +76,7 @@ void sharedMem_changeLed(uint32_t *colorArr){
     // *colorArr = color;
     assert(isInit);
     printf("changing shared mem\n");
+    // while( MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) == 1){}
 
     for(int i = 0; i< NUM_LEDS; i++){
         uint32_t write_val = colorArr[i];
@@ -84,17 +85,17 @@ void sharedMem_changeLed(uint32_t *colorArr){
 
         MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
         // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
-        uint8_t r = (write_val >> 24) & 0xFF;
-        uint8_t g = (write_val >> 16) & 0xFF;
-        uint8_t b = (write_val >> 8) & 0xFF;
+        // uint8_t r = (write_val >> 24) & 0xFF;
+        // uint8_t g = (write_val >> 16) & 0xFF;
+        // uint8_t b = (write_val >> 8) & 0xFF;
     
-        printf("%5d | 0x%08x | 0x%08x | %3d %3d %3d %08x %s  \n", 
-            i, write_val, write_val, r, g, b,write_val,
-            (write_val == 0) ? "!!MISMATCH!!" : "");
+        // printf("%5d | 0x%08x | 0x%08x | %3d %3d %3d %08x %s  \n", 
+        //     i, write_val, write_val, r, g, b,write_val,
+        //     (write_val == 0) ? "!!MISMATCH!!" : "");
 
     }
         
-    // MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
+    MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
     printf("got loop count from r5 %d %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET),
     MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET));
 
