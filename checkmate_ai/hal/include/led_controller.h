@@ -1,3 +1,6 @@
+#ifndef _LED_CONTROLLER_H_
+#define _LED_CONTROLLER_H_
+
 #include <stdio.h>
 #include <stdint.h>
 
@@ -20,3 +23,5 @@ typedef struct {
 void led_init();
 void led_cleanup();
 void led_changeLedColor(int *colorArr);
+
+#endif

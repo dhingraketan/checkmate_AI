@@ -1,6 +1,7 @@
-#include "led.h"
+#include "led_controller.h"
 #include "stdio.h"
 #include "stdbool.h"
+#include "sharedDataLayoutLinux.h"
 
 #define NUM_LEDS 64
 
@@ -34,4 +35,5 @@ void led_changeLedColor(int *colorArr){
     for(int i = 0; i< NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
+    sharedMem_changeLed(colorArr);
 }

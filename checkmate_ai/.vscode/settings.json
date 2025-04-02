@@ -1,6 +1,12 @@
 {
     "C_Cpp.codeAnalysis.clangTidy.enabled": true,
     "files.associations": {
+<<<<<<< HEAD
         "gamecontroller.h": "c"
+=======
+        "shareddatalayout.h": "c",
+        "led.h": "c",
+        "shareddatalayoutlinux.h": "c"
+>>>>>>> 4e73c88 (Changed filename because it matched one of zephrys file names)
     }
 }
