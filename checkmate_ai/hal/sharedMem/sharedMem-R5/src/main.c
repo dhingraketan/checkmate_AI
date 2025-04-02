@@ -10,7 +10,7 @@
 
 #include "sharedDataLayout.h"
 
-#define NEO_NUM_LEDS          64  // # LEDs in our string
+#define NEO_NUM_LEDS          8  // # LEDs in our string
 #define DELAY_TIME_uS   (500 * 1000)
 
 
@@ -105,10 +105,9 @@ int main(void)
 	// strcpy((char*) MSG_OFFSET, "Hello from R5 World (Take 6)!");
 
 	// printf("Contents of Shared Memory ATCM after string init:\n");
-	// for (int i = 0; i < END_MEMORY_OFFSET; i++) {
-	// 	char* addr = (char*)pSharedMem + i;
-	// 	printf("0x%08x = %2x (%c)\n", (uint32_t) addr, *addr, *addr);
-	// }
+	for (int i = 0; i < NEO_NUM_LEDS; i++) {
+		MEM_UINT32(((uint8_t*)pSharedMem + ARR_OFFSET) + (i * sizeof(uint32_t))) = 0;
+	}
 
 	MEM_UINT32(DELAY_OFFSET) = 0;
 	MEM_UINT32(LOOP_COUNT_OFFSET) = 0;
@@ -137,8 +136,8 @@ int main(void)
     //     0x000f0f00, // Purple
     //     0x0f000f00, // Teal
     // };  
-	gpio_pin_set_dt(&neopixel, 0);
-	NEO_DELAY_RESET();
+	// gpio_pin_set_dt(&neopixel, 0);
+	// NEO_DELAY_RESET();
 
 	while (true) {
 		// // Toggle LED

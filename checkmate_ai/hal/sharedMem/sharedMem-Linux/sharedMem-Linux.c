@@ -15,7 +15,7 @@
 #define ATCM_ADDR     0x79000000  // MCU ATCM (p59 TRM)
 #define BTCM_ADDR     0x79020000  // MCU BTCM (p59 TRM)
 #define MEM_LENGTH    0x8000
-#define NUM_LEDS        64
+#define NEO_NUM_LEDS      8
 
 static volatile void *pR5Base;
 static bool isInit = false;
@@ -78,20 +78,28 @@ void sharedMem_changeLed(uint32_t *colorArr){
     printf("changing shared mem\n");
     // while( MEM_UINT8((uint8_t*)pR5Base+ BOOL_OFFSET) == 1){}
 
-    for(int i = 0; i< NUM_LEDS; i++){
+    for(int i = 0; i< NEO_NUM_LEDS; i++){
+
+        uint32_t addr_offset = ARR_OFFSET + (i * sizeof(uint32_t));
+    
+        if (addr_offset + sizeof(uint32_t) > MEM_LENGTH) {
+            fprintf(stderr, "Out-of-bounds access attempt at index %d\n", i);
+            exit(EXIT_FAILURE);
+        }
+        
         uint32_t write_val = colorArr[i];
         // uint32_t write_val = color[i];
         // uint32_t write_val2 = colorArr[i];
+        uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
 
         MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
-        // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+        uint32_t read_val2 = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
         // uint8_t r = (write_val >> 24) & 0xFF;
         // uint8_t g = (write_val >> 16) & 0xFF;
         // uint8_t b = (write_val >> 8) & 0xFF;
     
-        // printf("%5d | 0x%08x | 0x%08x | %3d %3d %3d %08x %s  \n", 
-        //     i, write_val, write_val, r, g, b,write_val,
-        //     (write_val == 0) ? "!!MISMATCH!!" : "");
+        printf("%5d | 0x%08x | 0x%08x  | 0x%08x  \n", 
+            i, read_val, write_val, read_val2);
 
     }
         
@@ -108,7 +116,7 @@ int main1(void)
     printf("  Press the button to see its state here.\n");
 
     // Get access to shared memory for my uses
-    volatile void *pR5Base = getR5MmapAddr();
+    pR5Base = getR5MmapAddr();
 
 	// printf("Contents of memory :\n");
 	// for (int i = 0; i < 50; i++) {

@@ -4,7 +4,7 @@
 #include "sharedDataLayoutLinux.h"
 #include <assert.h>
 
-#define NUM_LEDS 64
+#define NEO_NUM_LEDS 8
 
 
 static bool isInit = false;
@@ -19,7 +19,7 @@ static LED_Color colorInfo[6] = {
 
 };
 
-static uint32_t colors[NUM_LEDS] = {0x0};
+static uint32_t colors[NEO_NUM_LEDS] = {0x0};
 
 void led_init(){
     isInit = true;
@@ -37,10 +37,10 @@ void led_changeLedColor(int *colorArr){
     assert(isInit);
 
     printf("inside led change color\n");
-    for(int i = 0; i< NUM_LEDS; i++){
+    for(int i = 0; i< NEO_NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
-    // for(int i = 0; i< NUM_LEDS; i++){
+    // for(int i = 0; i< NEO_NUM_LEDS; i++){
     //     printf("changed colorArr[%d]: 0x%08x\n", i, colors[i]);
     // }  
     sharedMem_changeLed(colors);
