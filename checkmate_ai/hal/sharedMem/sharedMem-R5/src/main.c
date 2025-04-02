@@ -76,23 +76,8 @@ static void initialize_gpio(const struct gpio_dt_spec *pPin, int direction)
 	}
 }
 
-/* 
-	Problem with Structs:
-	- When access data via a pointer-to-a-struct, program hangs.
 
-	Investigated:
-	- Changing field types in struct to 32-bit does not help.
-	- Adding alignmnet attribute to struct did not help.
-	- Unable to read or write via struct pointer
-	- Not an issue of buffering stdout
-	- When changed char array to 32-bit vaules form 8, in hangs on printing?
-
-	Works:
-	- Access via a pointer, instead of struct pointer.
-	- Access via an array
-*/
-
-int main(void)
+int main1(void)
 {
 	printf("Hello World! %s\n", CONFIG_BOARD_TARGET);
 
@@ -100,27 +85,7 @@ int main(void)
 	initialize_gpio(&btn, GPIO_INPUT);
 	initialize_gpio(&neopixel, GPIO_OUTPUT_ACTIVE);
 
-	uint32_t color1[NEO_NUM_LEDS] = {
-        0x0f000000, // Green
-        0x000f0000, // Red
-        0x00000f00, // Blue
-        0x0f0f0f00, // White
-        0x0f0f0f00, // White (via RGB)
-        0x0f0f0000, // Yellow
-        0x000f0f00, // Purple
-        0x0f000f00, // Teal
-	};
-
-	uint32_t color0[NEO_NUM_LEDS] = {
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White, 
-        0x0f0f0f00, // White
-	};
+	
 
 	// printf("Contents of Shared Memory ATCM:\n");
 	// for (int i = 0; i < END_MEMORY_OFFSET; i++) {
@@ -168,18 +133,18 @@ int main(void)
 		// }
 		// led_state = !led_state;
 
-		// while(MEM_UINT8(BOOL_OFFSET) == 1){
-		// 		printf("busy wait in r5");
-		// }
+		while(MEM_UINT8(BOOL_OFFSET) == 0){
+				printf("busy wait in r5");
+		}
 		uint32_t *color;
 
 		if(MEM_UINT8(BOOL_OFFSET) == 1){
-			color = color1;
+			for(int i = 0; i<64; i++){
+				color[i] = MEM_UINT32(ARR_OFFSET + i)
+			}
 		}
-		else {
-			color = color0;
-		}
-		
+		MEM_UINT8(BOOL_OFFSET) = 0;
+
 		gpio_pin_set_dt(&neopixel, 0);
 			
 		DELAY_NS(NEO_RESET_NS);

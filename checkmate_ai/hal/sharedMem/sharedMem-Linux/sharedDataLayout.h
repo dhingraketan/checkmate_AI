@@ -21,4 +21,8 @@
 
 #define MEM_UINT8(addr) *(uint8_t*)(addr)
 #define MEM_UINT32(addr) *(uint32_t*)(addr)
+
+void sharedMem_init();
+void sharedMem_cleanup();
+void sharedMem_changeLed();
 #endif

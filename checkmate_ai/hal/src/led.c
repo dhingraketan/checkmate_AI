@@ -30,6 +30,7 @@ void led_cleanup(){
 
 // changes the color and triggers R5 to light up LED
 void led_changeLedColor(int *colorArr){
+    printf("isnide led change color\n");
     for(int i = 0; i< NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
