@@ -20,8 +20,6 @@
 #define ARR_SIZE   (64 * sizeof(int32_t))
 #define END_MEMORY_OFFSET (ARR_OFFSET + ARR_SIZE)
 
-
-
 #define MEM_UINT8(addr) *(uint8_t*)(addr)
 #define MEM_UINT32(addr) *(uint32_t*)(addr)
 #endif
