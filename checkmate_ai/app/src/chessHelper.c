@@ -21,6 +21,8 @@ static int possible[8][8];
 static int pieceSelected = 0;
 static int selectedRow = -1, selectedCol = -1;
 static Color currentTurn = WHITE;
+static bool invalidMove = false;
+static bool gameOver = false;
 
 
 // Initialize board with standard chess starting positions.
@@ -304,10 +306,12 @@ void processPieceSelection(const char *input) {
     if (board[row][col].type == EMPTY || board[row][col].color != currentTurn) {
         printf("Invalid selection: No %s piece at that square.\n",
                (currentTurn == WHITE ? "WHITE" : "BLACK"));
+        invalidMove = true;
         return;
     }
     //pthread_mutex_unlock(&boardMutex);
 
+    invalidMove = false;
     pieceSelected = 1;
     selectedRow = row;
     selectedCol = col;
@@ -327,9 +331,11 @@ void processDestination(const char *input) {
         if (destRow == selectedRow && destCol == selectedCol) {
             pieceSelected = 0;
             memset(possible, 0, sizeof(possible));
+            invalidMove = false;
             return;
         }
         printf("Invalid move, try again.\n");
+        invalidMove = true;
         return;
     }
 
@@ -344,7 +350,7 @@ void processDestination(const char *input) {
             printf("Game over: %s King has been killed.\n",
                    (board[destRow][destCol].color == WHITE ? "White" : "Black"));
             // End the thread if the king is captured.
-            pthread_exit(NULL);
+            gameOver = true;
         } else {
             printf("Captured %s %s at %d%c.\n",
                    (board[destRow][destCol].color == WHITE ? "White" : "Black"),
@@ -367,12 +373,10 @@ void processDestination(const char *input) {
         }
     }
 
-    ////pthread_mutex_unlock(&boardMutex);
-
-    
     // Clear selection and switch turn.
     pieceSelected = 0;
     memset(possible, 0, sizeof(possible));
+    invalidMove = false;
     toggleCurrentTurn();
 }
 
@@ -398,7 +402,7 @@ void *chessGameThread(void *arg) {
     // Initialize the board.
     initializeBoard();
 
-    while (1) {
+    while (!gameOver) {
         pthread_mutex_lock(&boardMutex);
 
         while(!isUserTurn){
@@ -467,11 +471,7 @@ void *chessGameThread(void *arg) {
             // Signal the Stockfish thread to start
             pthread_cond_signal(&stockfishTurnCond);
         }
-        else {
-            
-            printf("making isChnageLed true in chessHelper\n");
-            printf("unlocking led\n");
-        }
+
         pthread_mutex_lock(&ledMutex);
         isChangeLed = true;
         pthread_cond_signal(&ledCondVar);
@@ -480,7 +480,10 @@ void *chessGameThread(void *arg) {
         pthread_mutex_unlock(&boardMutex);
         
     }
-    pthread_exit(NULL);
+
+    chessHelper_cleanup();
+    return NULL;
+    
 }
 
 
@@ -515,4 +518,10 @@ char getCurrentTurnString(){
 
 void toggleCurrentTurn(){
     currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
+}
+
+void chessHelper_cleanup(){}
+
+bool chessHelper_getIsValidMove(){
+    return !invalidMove;
 }

@@ -13,16 +13,29 @@ static pthread_t threadId;
 static void LogicLedManager_writeColorArr(){
     assert(isInit);
 
+    bool isValid = chessHelper_getIsValidMove();
+
     int indx = 0;
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            if(possible[i][j]){
-                colorArr[indx++] = COLOR_WHITE;
-            }
-            else {
+
+    if(isValid){
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                if(possible[i][j]){
+                    colorArr[indx++] = COLOR_WHITE;
+                }
+                else {
+                    colorArr[indx++] = COLOR_NONE;
+                }
                 colorArr[indx++] = COLOR_NONE;
             }
-            colorArr[indx++] = COLOR_NONE;
+        }
+    }
+    else {
+        for(int i = 0; i < 8; i++){
+            for(int j = 0; j < 8; j++){
+                colorArr[indx++] = COLOR_RED;
+                colorArr[indx++] = COLOR_NONE;
+            }
         }
     }
 }
