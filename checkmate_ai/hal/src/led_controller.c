@@ -30,6 +30,7 @@ void led_init(){
 void led_cleanup(){
     assert(isInit);
     isInit = false;
+    sharedMem_cleanup();
 }
 
 // changes the color and triggers R5 to light up LED
@@ -40,8 +41,5 @@ void led_changeLedColor(int *colorArr){
     for(int i = 0; i< NEO_NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
     }    
-    // for(int i = 0; i< NEO_NUM_LEDS; i++){
-    //     printf("changed colorArr[%d]: 0x%08x\n", i, colors[i]);
-    // }  
     sharedMem_changeLed(colors);
 }
