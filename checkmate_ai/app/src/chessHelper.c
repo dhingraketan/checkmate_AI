@@ -1,5 +1,7 @@
 #include "chessHelper.h"
 #include "sensor_game_engine_manager.h"
+#include "BoardReader.h"
+#include <unistd.h>
 
 
 pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
@@ -67,7 +69,7 @@ void printBoard() {
     printf("  A  B  C  D  E  F  G  H\n");
 
     //pthread_mutex_lock(&boardMutex);
-    for (int r = 0; r < 8; r++){
+    for (int r = 7; r >= 0; r--){
         printf("%d ", r + 1);
         for (int c = 0; c < 8; c++){
             // If a piece is selected and this square is a valid move, show a marker.
@@ -92,17 +94,17 @@ void getPieceSymbol(Piece p, char *symbol) {
     if (p.type == EMPTY) {
         strcpy(symbol, ". ");
     } else if (p.type == PAWN) {
-        strcpy(symbol, (p.color == WHITE ? "♙ " : "♟ "));
+        strcpy(symbol, (p.color == WHITE ? "♟ " : "♙ "));
     } else if (p.type == ROOK) {
-        strcpy(symbol, (p.color == WHITE ? "♖ " : "♜ "));
+        strcpy(symbol, (p.color == WHITE ? "♜ " : "♖ "));
     } else if (p.type == KNIGHT) {
-        strcpy(symbol, (p.color == WHITE ? "♘ " : "♞ "));
+        strcpy(symbol, (p.color == WHITE ? "♞ " : "♘ "));
     } else if (p.type == BISHOP) {
-        strcpy(symbol, (p.color == WHITE ? "♗ " : "♝ "));
+        strcpy(symbol, (p.color == WHITE ? "♝ " : "♗ "));
     } else if (p.type == QUEEN) {
-        strcpy(symbol, (p.color == WHITE ? "♕ " : "♛ "));
+        strcpy(symbol, (p.color == WHITE ? "♛ " : "♕ "));
     } else if (p.type == KING) {
-        strcpy(symbol, (p.color == WHITE ? "♔ " : "♚ "));
+        strcpy(symbol, (p.color == WHITE ? "♚ " : "♔ "));
     }
 }
 
@@ -368,6 +370,17 @@ void processDestination(const char *input) {
     toggleCurrentTurn();
 }
 
+void boardCoordToString(int rank, int file, char* output) {
+    if (rank < 0 || rank > 7 || file < 0 || file > 7) {
+        sprintf(output, "??"); // invalid input
+        return;
+    }
+
+    output[0] = 'A' + file;      // file: 0–7 → A–H
+    output[1] = '1' + rank;      // rank: 0–7 → 1–8
+    output[2] = '\0';            // null terminator
+}
+
 
 
 void *chessGameThread(void *arg) {
@@ -401,12 +414,39 @@ void *chessGameThread(void *arg) {
         else
             printf("inAir []\n");
 
-        // Prompt for input.
-        printf("INPUT: ");
-        if (!fgets(input, sizeof(input), stdin))
-            break;
-        // Remove trailing newline.
+        
+        int rank, file;
+        
+        if(pieceSelected){
+            while (1) {
+                if (boardReader_detectDrop(&rank, &file)) break;
+            
+                // Fallback: if the square was put back, treat it as a cancel
+                uint8_t state[8][8];
+                boardReader_getState(state);
+                if (state[selectedRow][selectedCol] == 1) {
+                    printf("Move cancelled (piece returned to original square).\n");
+                    pieceSelected = 0;
+                    memset(possible, 0, sizeof(possible));
+                    break;
+                }
+            
+                usleep(10000); // 10 ms delay
+            }
+
+        } else{
+            while(!boardReader_detectPickup(&rank, &file)){
+                usleep(10000); // 10 ms delay
+            }
+        }
+        printf("----------...\n");
+        // Convert the rank and file to a string.
+        boardCoordToString(rank, file, input);
+
         input[strcspn(input, "\n")] = 0;
+
+        // Print the input.
+        printf("Input: %s\n", input);
         
         // Validate input.
         if (!validateInput(input))

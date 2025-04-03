@@ -1,5 +1,6 @@
 #include <sensor_game_engine_manager.h>
 #include "chessHelper.h"
+#include "BoardReader.h"
 #include <game_engine_manager.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -44,6 +45,7 @@ void SensorGameEngineManager_cleanup(){
 
 int main(){
     printf("here2\n");
+    boardReader_init();
     pthread_create(&threadId, NULL, SensorGameEngineManager_init, NULL);
 
     SensorGameEngineManager_cleanup();

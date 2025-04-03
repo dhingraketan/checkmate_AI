@@ -51,32 +51,6 @@ void portExtender_init_and_config() {
     is_initialized = true;
 }
 
-// void portExtender_readAllPins(int portNumber, uint8_t portData[16]) {
-//     if (!is_initialized) {
-//         return;
-//     }
-
-//     if (portNumber < 1 || portNumber > 4) {
-//         return;
-//     }
-
-//     int i2c_fd = init_i2c_bus(I2C_BUS, mcp_addresses[portNumber - 1]);
-
-//     uint16_t portA = read_i2c_reg16(i2c_fd, GPIOA);
-
-//     usleep(5000);
-
-//     uint16_t portB = read_i2c_reg16(i2c_fd, GPIOB);
-
-//     clean_up_i2c(i2c_fd);
-
-//     // Extract individual pin states (bit-wise) and store in portData array
-//     for (int i = 0; i < 8; i++) {
-//         portData[i] = (portA & (1 << i)) ? 0 : 1;
-//         portData[i + 8] = (portB & (1 << i)) ? 0 : 1;
-//     }
-// }
-
 void portExtender_readAllPins(uint8_t state[8][8]){
     if (!is_initialized) {
         return;

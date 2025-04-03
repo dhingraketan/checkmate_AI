@@ -1,6 +1,6 @@
 # CMake Build Configuration for root of project
 cmake_minimum_required(VERSION 3.18)
-project(assignment_1 VERSION 1.0 DESCRIPTION "Extender" LANGUAGES C)
+project(extender VERSION 1.0 DESCRIPTION "Extender" LANGUAGES C)
 
 # Compiler options (inherited by sub-folders)
 set(CMAKE_C_STANDARD 11)
@@ -19,4 +19,3 @@ add_link_options(-pthread)
 # What folders to build
 add_subdirectory(hal)  
 add_subdirectory(app)
-
