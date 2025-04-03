@@ -4,7 +4,7 @@
 #include "sharedDataLayoutLinux.h"
 #include <assert.h>
 
-#define NEO_NUM_LEDS 64
+#define NEO_NUM_LEDS 128
 
 
 static bool isInit = false;

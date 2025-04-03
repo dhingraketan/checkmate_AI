@@ -10,7 +10,7 @@
 
 #include "sharedDataLayout.h"
 
-#define NEO_NUM_LEDS          64  // # LEDs in our string
+#define NEO_NUM_LEDS          128  // # LEDs in our string
 #define DELAY_TIME_uS   (500 * 1000)
 
 
