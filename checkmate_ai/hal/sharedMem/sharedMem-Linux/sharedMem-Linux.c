@@ -73,9 +73,7 @@ static void sharedMem_readColorsFromMem(){
 void sharedMem_init(){
     printf("init sharedmem\n");
     isInit = true;
-    pR5Base = getR5MmapAddr();
-    sharedMem_readColorsFromMem();
-    
+    pR5Base = getR5MmapAddr(); 
 }
 
 void sharedMem_cleanup(){
@@ -95,8 +93,8 @@ void sharedMem_changeLed(uint32_t *colorArr){
 
     for(int i = 0; i< NEO_NUM_LEDS; i++){
         
-        // uint32_t write_val = colorArr[i];
-        uint32_t write_val = 0x000f0000;
+        uint32_t write_val = colorArr[i];
+        // uint32_t write_val = 0x000f0000;
 
 
         // MEM_UINT32((((uint8_t*)pR5Base )+ ARR_OFFSET) + (i * sizeof(uint32_t))) = 0;
@@ -104,14 +102,15 @@ void sharedMem_changeLed(uint32_t *colorArr){
         // uint32_t write_val = color[i];
         // uint32_t write_val2 = colorArr[i];
         // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
-        int32_t *addr = ((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t));
-        // *addr = write_val;
-        MEM_UINT32(addr) = write_val;
+        MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
+        // int32_t *addr = ((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t));
+        // // *addr = write_val;
+        // MEM_UINT32(addr) = write_val;
 
         // MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
 
 
-        uint32_t read_val2 = *addr;
+        uint32_t read_val2 =  MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
         // uint8_t r = (write_val >> 24) & 0xFF;
         // uint8_t g = (write_val >> 16) & 0xFF;
         // uint8_t b = (write_val >> 8) & 0xFF;

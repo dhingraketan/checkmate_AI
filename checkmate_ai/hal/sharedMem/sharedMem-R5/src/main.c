@@ -29,6 +29,7 @@ volatile int junk_delay = 0;
 #define DELAY_600_NS() {for (junk_delay=0; junk_delay<9 ;junk_delay++);}
 #define DELAY_700_NS() {for (junk_delay=0; junk_delay<16 ;junk_delay++);}
 #define DELAY_800_NS() {for (junk_delay=0; junk_delay<23 ;junk_delay++);}
+#define DELAY_1_S() {for (junk_delay=0; junk_delay<30000000 ;junk_delay++);}
 
 #define DELAY_NS(ns) do {int target = k_cycle_get_32() + k_ns_to_cyc_near32(ns); \
 	while(k_cycle_get_32() < target) ; } while(false)
@@ -253,6 +254,7 @@ int main(void)
 
 		gpio_pin_set_dt(&neopixel, 0);
 		NEO_DELAY_RESET();
+		DELAY_1_S();
 
 		// k_busy_wait(1 * 1000);
 		// k_msleep(500);
