@@ -4,6 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 // Define piece types and colors.
 typedef enum { EMPTY, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING } PieceType;
@@ -46,3 +47,7 @@ char getCurrentTurnString();
 void toggleCurrentTurn();
 
 void copyPossibleMoves(int dest[8][8]);
+
+void chessHelper_cleanup();
+
+bool chessHelper_getIsValidMove();
