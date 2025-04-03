@@ -43,6 +43,9 @@ void SensorGameEngineManager_cleanup(){
 
     printf("here3\n");
     pthread_join(threadId, NULL);
+    pthread_join(gameThread, NULL);
+    Game_engine_manager_cleanup();
+    LogicLedManager_cleanup();
     
     isInit = false;
 }

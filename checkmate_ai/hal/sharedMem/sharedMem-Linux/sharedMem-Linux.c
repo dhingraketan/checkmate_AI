@@ -15,7 +15,7 @@
 #define ATCM_ADDR     0x79000000  // MCU ATCM (p59 TRM)
 #define BTCM_ADDR     0x79020000  // MCU BTCM (p59 TRM)
 #define MEM_LENGTH    0x8000
-#define NEO_NUM_LEDS      64
+#define NEO_NUM_LEDS      128
 
 static volatile void *pR5Base;
 static bool isInit = false;

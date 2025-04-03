@@ -16,7 +16,7 @@
 #define BOOL_OFFSET (DELAY_OFFSET + sizeof(uint32_t))
 #define LOOP_COUNT_OFFSET     (BOOL_OFFSET + sizeof(uint32_t))  
 #define ARR_OFFSET (LOOP_COUNT_OFFSET + sizeof(uint32_t))
-#define ARR_SIZE   (64 * sizeof(uint32_t))
+#define ARR_SIZE   (128 * sizeof(uint32_t))
 #define END_MEMORY_OFFSET (ARR_OFFSET + ARR_SIZE)
 
 #define MEM_UINT8(addr) *(uint8_t*)(addr)

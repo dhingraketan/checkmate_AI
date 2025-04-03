@@ -195,5 +195,6 @@ void Game_engine_manager_init(int gameMode){
 
 
 void Game_engine_manager_cleanup(){
+    isInit = false;
     pthread_join(gameManagerThread, NULL);
 }

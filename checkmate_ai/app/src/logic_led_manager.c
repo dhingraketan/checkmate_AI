@@ -3,9 +3,11 @@
 #include "chessHelper.h"
 #include "pthread.h"
 #include "assert.h"
+
+#define NEO_NUM_LEDS 128
 static bool isInit = false;
 static int possible[8][8];
-static int colorArr[64];
+static int colorArr[128];
 static pthread_t threadId;
 
 static void LogicLedManager_writeColorArr(){
@@ -21,6 +23,7 @@ static void LogicLedManager_writeColorArr(){
             else {
                 colorArr[indx++] = COLOR_NONE;
             }
+            colorArr[indx++] = COLOR_NONE;
         }
     }
 }
@@ -31,7 +34,7 @@ static void LogicLedManager_changeColor(){
     LogicLedManager_writeColorArr();
     led_changeLedColor(colorArr);
     printf("color arr changed to\n");
-    for(int i = 0;i<64; i++){
+    for(int i = 0;i<NEO_NUM_LEDS; i++){
         printf("%d",colorArr[i]);
     }
 }
@@ -62,7 +65,6 @@ void * LogicLedManager_makeThread(){
         }
         copyPossibleMoves(possible);
         LogicLedManager_changeColor();
-
         pthread_mutex_unlock(&ledMutex);
 
     }
@@ -85,6 +87,6 @@ void LogicLedManager_cleanup(){
 
     isInit = false;
     printf("cleanup led\n");
-
+    led_cleanup();
     pthread_join(threadId, NULL);
 }
