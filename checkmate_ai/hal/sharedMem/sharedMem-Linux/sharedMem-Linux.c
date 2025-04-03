@@ -63,7 +63,7 @@ static void sharedMem_readColorsFromMem(){
     int count = 0;
     while(1){
         uint32_t myColor = (count %2 == 0) ? 0x000f0000 : 0x00000f00;
-        printf("Changing color to 0x%08x\n", myColor);
+        // printf("Changing color to 0x%08x\n", myColor);
         MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (3 * sizeof(uint32_t))) = myColor;
         count++;
         sleep(1);
@@ -71,7 +71,7 @@ static void sharedMem_readColorsFromMem(){
 }
 
 void sharedMem_init(){
-    printf("init sharedmem\n");
+    // printf("init sharedmem\n");
     isInit = true;
     pR5Base = getR5MmapAddr(); 
 }
@@ -81,72 +81,12 @@ void sharedMem_cleanup(){
     freeR5MmapAddr();
 }
 void sharedMem_changeLed(uint32_t *colorArr){
-    printf("changing shared mem\n");
 
     for(int i = 0; i< NEO_NUM_LEDS; i++){
         
         uint32_t write_val = colorArr[i];
 
         MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
-
-        // uint32_t read_val2 =  MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
-
-        // printf("%5d | 0x%08x |  0x%08x \n", 
-        // i, write_val, read_val2);
-
-    }
-    MEM_UINT32((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
-    printf("got loop count from r5 %d %d", MEM_UINT32((uint8_t*)pR5Base+ LOOP_COUNT_OFFSET),
-    MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET));
-
-}
-
-int main1(void)
-{
-    printf("Sharing memory with R5\n");
-    printf("  LED should change speed every 5s.\n");
-    printf("  Press the button to see its state here.\n");
-
-    // Get access to shared memory for my uses
-    // pR5Base = getR5MmapAddr();
-
-	// printf("Contents of memory :\n");
-	// for (int i = 0; i < 50; i++) {
-	// 	volatile char* addr = pR5Base + i;
-    //     char val = *addr;
-    //     printf("Offset %d = %3d (char '%c')\n", i, val, val);
-	// }
-
-    // // Print out the mem contents:
-    // printf("From the R5, memory hold:\n");
-    // // NOTE: Cannot access it as a string, gives "Bus error"
-    // //printf("    %15s: \"%s\"\n", "msg", (char*)(pR5Base + MSG_OFFSET));
-    // printf("    %15s: 0x%04x\n", "delay", MEM_UINT32(pR5Base + DELAY_OFFSET));
-    // printf("    %15s: 0x%04x\n", "bool ", MEM_UINT8(pR5Base + BOOL_OFFSET));
-
-
-    // MEM_UINT32((uint8_t*)pR5Base + DELAY_OFFSET) = 100;
-    // Drive it
-    for (int i = 0; true; i++) {
-        // Set LED timing
-        printf("here\n");
-        
-        // if(MEM_UINT32(pR5Base + BOOL_OFFSET) == 0){
-        //     printf("bust wait\n");
-        // }
-        // MEM_UINT32(pR5Base + BOOL_OFFSET) = 0;
-        // printf("set it to 0\n");
-        // MEM_UINT32(pR5Base + DELAY_OFFSET) = (i % 10 < 5) ? 100 : 250;
-
-        // // Print button
-        // printf("Loop Count: %7d\n", 
-        //     MEM_UINT32(pR5Base + LOOP_COUNT_OFFSET)
-        // );
-
-        // Timing
-        sleep(1);
     }
 
-    // Cleanup
-    // freeR5MmapAddr();
 }
