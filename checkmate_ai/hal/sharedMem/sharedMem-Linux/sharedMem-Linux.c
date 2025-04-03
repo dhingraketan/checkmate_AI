@@ -83,45 +83,16 @@ void sharedMem_cleanup(){
 void sharedMem_changeLed(uint32_t *colorArr){
     printf("changing shared mem\n");
 
-    printf("Contents of memory :\n");
-	// for (int i = 0; i < 50; i++) {
-	// 	volatile char* addr =(volatile char*) pR5Base + i;
-    //     char val = *addr;
-    //     printf("Offset %d = %3d (char '%c')\n", i, val, val);
-	// }
-    // while( MEM_UINT32((uint8_t*)pR5Base+ BOOL_OFFSET) == 1){}
-
     for(int i = 0; i< NEO_NUM_LEDS; i++){
         
         uint32_t write_val = colorArr[i];
-        // uint32_t write_val = 0x000f0000;
 
-
-        // MEM_UINT32((((uint8_t*)pR5Base )+ ARR_OFFSET) + (i * sizeof(uint32_t))) = 0;
-      
-        // uint32_t write_val = color[i];
-        // uint32_t write_val2 = colorArr[i];
-        // uint32_t read_val = MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
         MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
-        // int32_t *addr = ((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t));
-        // // *addr = write_val;
-        // MEM_UINT32(addr) = write_val;
 
-        // MEM_UINT32(((uint8_t*)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t))) = write_val;
+        // uint32_t read_val2 =  MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
 
-
-        uint32_t read_val2 =  MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
-        // uint8_t r = (write_val >> 24) & 0xFF;
-        // uint8_t g = (write_val >> 16) & 0xFF;
-        // uint8_t b = (write_val >> 8) & 0xFF;
-        // 
-
-        printf("%5d | 0x%08x |  0x%08x \n", 
-        i, write_val, read_val2);
-
-    
-        // printf("%5d | 0x%08x | 0x%08x  | 0x%08x\n", 
-        //     i, read_val, write_val, read_val2);
+        // printf("%5d | 0x%08x |  0x%08x \n", 
+        // i, write_val, read_val2);
 
     }
     MEM_UINT32((uint8_t*)pR5Base+ BOOL_OFFSET) = 1;
