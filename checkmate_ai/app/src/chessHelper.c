@@ -7,9 +7,9 @@
 
 pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t userTurnCond = PTHREAD_COND_INITIALIZER;
-pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
+// pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
+// pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
 
 bool isStockfishTurn = false;
 bool isUserTurn = true;
@@ -391,6 +391,22 @@ void boardCoordToString(int rank, int file, char* output) {
     output[2] = '\0';            // null terminator
 }
 
+static void chessHelper_makeStructForLed(int arr[8][8],LIGHT_UP *out_array) {
+    int idx = 0;
+
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (arr[i][j] == 1) {
+                out_array[idx].row = i;
+                out_array[idx].col = j;
+                out_array[idx].colorName = COLOR_WHITE;
+                idx++;
+            }
+        }
+    }
+
+}
+
 
 
 void *chessGameThread(void *arg) {
@@ -404,6 +420,11 @@ void *chessGameThread(void *arg) {
 
     while (!gameOver) {
         pthread_mutex_lock(&boardMutex);
+
+        // we have the mutex - stockfish is done
+        // if this is not the first move then we want to light up stock fish's move
+
+        if(isCheckMate)
 
         while(!isUserTurn){
             pthread_cond_wait(&userTurnCond, &boardMutex);
@@ -471,13 +492,24 @@ void *chessGameThread(void *arg) {
             // Signal the Stockfish thread to start
             pthread_cond_signal(&stockfishTurnCond);
         }
-
-        pthread_mutex_lock(&ledMutex);
-        isChangeLed = true;
-        pthread_cond_signal(&ledCondVar);
-        pthread_mutex_unlock(&ledMutex);
-
         pthread_mutex_unlock(&boardMutex);
+        if(pieceSelected){
+            // light up possible moves
+            LIGHT_UP leds[64];
+            chessHelper_makeStructForLed(possible, leds);
+            LogicLedManager_changeColor(leds);
+
+        }
+        else {
+            // switch all off
+            LIGHT_UP *leds = NULL;
+            LogicLedManager_changeColor(leds);
+        }
+        // pthread_mutex_lock(&ledMutex);
+        // isChangeLed = true;
+        // pthread_cond_signal(&ledCondVar);
+        // pthread_mutex_unlock(&ledMutex);
+
         
     }
 
@@ -525,3 +557,4 @@ void chessHelper_cleanup(){}
 bool chessHelper_getIsValidMove(){
     return !invalidMove;
 }
+

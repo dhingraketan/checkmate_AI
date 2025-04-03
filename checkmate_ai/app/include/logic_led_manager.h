@@ -3,16 +3,24 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include "led_controller.h"
 
 
-extern pthread_cond_t ledCondVar;
-extern pthread_mutex_t ledMutex;
-extern bool isChangeLed;
+// extern pthread_cond_t ledCondVar;
+// extern pthread_mutex_t ledMutex;
+// extern bool isChangeLed;
+
+typedef struct {
+    int row;
+    int col; 
+    LED_COLOR_NAME colorName;
+} LIGHT_UP;
 
 
 void LogicLedManager_init();
 void LogicLedManager_cleanup();
-// void LogicLedManager_writeColorArr();
+void LogicLedManager_changeColor(LIGHT_UP *leds);
+
 
 
 #endif
