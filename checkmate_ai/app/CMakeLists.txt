@@ -6,6 +6,8 @@ add_executable(extender ${MY_SOURCES})
 
 # Make use of the HAL library
 target_link_libraries(extender LINK_PRIVATE hal)
+target_link_libraries(extender LINK_PRIVATE lcd)
+target_link_libraries(extender LINK_PRIVATE lgpio)
 
 # Copy executable to final location (change `hello_world` to project name as needed)
 add_custom_command(TARGET extender POST_BUILD 

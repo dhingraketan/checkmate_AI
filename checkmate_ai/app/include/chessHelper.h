@@ -9,6 +9,7 @@
 typedef enum { EMPTY, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING } PieceType;
 typedef enum { NONE, WHITE, BLACK } Color;
 
+extern char currentPlayer[10];
 // New enum for side classification.
 typedef enum { NONE_SIDE, KING_SIDE, QUEEN_SIDE } Side;
 

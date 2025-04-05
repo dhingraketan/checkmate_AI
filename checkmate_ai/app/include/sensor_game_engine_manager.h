@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+
 typedef enum  {
     GAME_MODE_BEST_MOVE,
     GAME_MODE_PLAY_WITH_ENGINE,

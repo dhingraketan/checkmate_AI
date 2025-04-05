@@ -16,9 +16,11 @@ static int pieceSelected = 0;
 static int selectedRow = -1, selectedCol = -1;
 static Color currentTurn = WHITE;
 
+char currentPlayer[10] = "White";
 
 // Initialize board with standard chess starting positions.
 void initializeBoard() {
+
     // Set all squares to EMPTY.
     // //pthread_mutex_lock(&boardMutex);
     for (int r = 0; r < 8; r++){
@@ -490,7 +492,19 @@ Color getCurrentTurn(){
 char getCurrentTurnString(){
     return (currentTurn == WHITE) ? 'w' : 'b';
 }
-
+extern int whiteTimeRemaining;
+extern int blackTimeRemaining;
 void toggleCurrentTurn(){
+
+    if (whiteTimeRemaining <= 0) {
+        printf("White's timer expired. Game over.\n");
+        pthread_exit(NULL);
+    }
+    if (blackTimeRemaining <= 0) {
+        printf("Black's timer expired. Game over.\n");
+        pthread_exit(NULL);
+    }
+
     currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
+    strcpy(currentPlayer, (currentTurn == WHITE ? "White" : "Black"));
 }
