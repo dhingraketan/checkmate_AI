@@ -84,29 +84,16 @@ void LogicLedManager_changeColor(LIGHT_UP *leds){
 
 void LogicLedManager_init(){
     isInit = true;
-<<<<<<< HEAD
     led_init();
     // pthread_create(&threadId,NULL, LogicLedManager_makeThread, NULL);
-=======
-    printf("init led manager\n");
-    led_init();
-    pthread_create(&threadId,NULL, LogicLedManager_makeThread, NULL);
->>>>>>> 334f5df (Setup for led, buggy)
 }
 
 
 
 void LogicLedManager_cleanup(){
-<<<<<<< HEAD
     assert(isInit);
 
     isInit = false;
     led_cleanup();
     // pthread_join(threadId, NULL);
-=======
-    isInit = false;
-    printf("cleanup led\n");
-
-    pthread_join(threadId, NULL);
->>>>>>> 334f5df (Setup for led, buggy)
 }
