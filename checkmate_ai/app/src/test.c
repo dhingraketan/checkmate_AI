@@ -79,3 +79,11 @@
     
 //     return 0;
 // }
+
+// #include "GameController.h"
+// #include "LCDPrinter.h"
+
+// int main(){
+//     lcd_printer_init();
+//     GameController_init();
+// }
