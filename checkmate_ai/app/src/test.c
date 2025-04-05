@@ -80,7 +80,7 @@
 //     return 0;
 // }
 
-// #include "GameController.h"
+#include "GameController.h"
 // #include "LCDPrinter.h"
 
 // int main(){

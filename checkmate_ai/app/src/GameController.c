@@ -133,5 +133,6 @@ void GameController_init(){
     BtnStateMachine_init();
     GameController_setGameMode();
     lcd_printer_toogle_screen(GAME_SCREEN);
+    sleep(60);
 
 }

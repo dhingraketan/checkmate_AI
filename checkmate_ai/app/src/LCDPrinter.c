@@ -42,8 +42,9 @@ static void LCDPrinter_print_mode_selection_screen(){
     Paint_DrawString_EN(textX, midY - 20, "Select Game Mode", &Font20, WHITE, BLACK);
     Paint_DrawString_EN(textX + 90, midY + 5, modeStr, &Font20, WHITE, BLACK);
 
-    Paint_DrawString_EN(textX, LCD_1IN54_HEIGHT - 40, "Use J-Stick to Change", &Font12, WHITE, BLACK);
-    Paint_DrawString_EN(textX, LCD_1IN54_HEIGHT - 20, "Press J-Stick to Select", &Font12, WHITE, BLACK);
+    Paint_DrawString_EN(textX, LCD_1IN54_HEIGHT - 60, "Use Joystick:", &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(textX + 10, LCD_1IN54_HEIGHT - 40, "Up/Down to change", &Font16, WHITE, BLACK);
+    Paint_DrawString_EN(textX + 10, LCD_1IN54_HEIGHT - 20, "Press to Select", &Font16, WHITE, BLACK);
 
     LCD_1IN54_Display(s_fb);
 }
