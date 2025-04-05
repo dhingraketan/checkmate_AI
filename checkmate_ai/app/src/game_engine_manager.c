@@ -88,6 +88,8 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
         isCheckMate = true;
         return;
     }
+    printf("this is line %s", line);
+
     sscanf(line, "bestmove %4s", bestmove);
 
     strncpy(from, bestmove, 2); // Copy "e2"
@@ -124,6 +126,8 @@ static void * Game_engine_manager_startGameEngine(void * gameMode){
         memset(returnLine, 0, MAX_FEN_STRING_LEN);
         gameEngine_sendCmd(CMD_POSITION, boadStateFenString,returnLine);
         memset(returnLine, 0, MAX_FEN_STRING_LEN);
+        gameEngine_sendCmd(CMD_D,boadStateFenString, returnLine);
+        Game_engine_manager_parseOutput(returnLine, from, to);
         // get the best move
         // printf("sending go cmd\n");
         gameEngine_sendCmd(CMD_GO, NULL,returnLine);
