@@ -2,6 +2,7 @@
 #include "sensor_game_engine_manager.h"
 <<<<<<< HEAD
 #include "BoardReader.h"
+#include "game_engine_manager.h"
 #include <unistd.h>
 =======
 >>>>>>> 334f5df (Setup for led, buggy)
@@ -24,8 +25,11 @@ static int possible[8][8];
 static int pieceSelected = 0;
 static int selectedRow = -1, selectedCol = -1;
 static Color currentTurn = WHITE;
-static bool invalidMove = false;
 static bool gameOver = false;
+static int totalMoves = 0;
+static char from[3];
+static char to[3];
+static bool invalidMove = false;
 
 
 // Initialize board with standard chess starting positions.
@@ -420,22 +424,10 @@ void *chessGameThread(void *arg) {
 
     // Initialize the board.
     initializeBoard();
+    
 
     while (!gameOver) {
-        pthread_mutex_lock(&boardMutex);
 
-        // we have the mutex - stockfish is done
-        // if this is not the first move then we want to light up stock fish's move
-
-        if(isCheckMate)
-
-        while(!isUserTurn){
-            pthread_cond_wait(&userTurnCond, &boardMutex);
-        }
-
-        pthread_mutex_unlock(&boardMutex);
-
-        pthread_mutex_lock(&boardMutex);
         // Display whose turn it is.
         printf("\n%s Turn\n", (currentTurn == WHITE ? "WHITE" : "BLACK"));
         // Print the board.
@@ -489,18 +481,14 @@ void *chessGameThread(void *arg) {
         processInput(input);
 
         if(currentTurn == BLACK){
-            isUserTurn = false;
-            isStockfishTurn = true;
-
-            // Signal the Stockfish thread to start
-            pthread_cond_signal(&stockfishTurnCond);
+            Game_engine_manager_processBoardState(board, totalMoves);
+            totalMoves +=1;
         }
         else {
             printf("making isChnageLed true in chessHelper\n");
             isChangeLed = true;
-            // pthread_cond_signal(&ledCondVar);
+
         }
-        pthread_mutex_unlock(&boardMutex);
         if(pieceSelected){
             // light up possible moves
             LIGHT_UP leds[64];
@@ -513,17 +501,25 @@ void *chessGameThread(void *arg) {
             LIGHT_UP *leds = NULL;
             LogicLedManager_changeColor(leds);
         }
-        // pthread_mutex_lock(&ledMutex);
-        // isChangeLed = true;
-        // pthread_cond_signal(&ledCondVar);
-        // pthread_mutex_unlock(&ledMutex);
+
+        // check for check and check mate - this also gets the best move if a move is possible
+        Game_engine_manager_processBoardState(board, totalMoves, from, to);
+
+        if(isCheck){
+            // show move by lighting up lights
+            printf("Stockfish wants to make move from %s to %s\n", from, to);
+
+        }
+
+        if(isCheckMate){
+            gameOver = true;
+            // turn leds red
+            
+        }
 
         
     }
-
-    chessHelper_cleanup();
-    return NULL;
-    
+    pthread_exit(NULL);
 }
 
 

@@ -9,9 +9,11 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <pthread.h>
-#include <stdatomic.h>
 #include <ctype.h>
+<<<<<<< HEAD
 #include <logic_led_manager.h>
+=======
+>>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
 #include <assert.h>
 
 #define DEFAULT_GAME_MODE GAME_MODE_BEST_MOVE
@@ -29,8 +31,12 @@ void * SensorGameEngineManager_init(){
     // init game logic
     printf("here\n");
     pthread_create(&gameThread, NULL, chessGameThread, NULL); 
+<<<<<<< HEAD
     Game_engine_manager_init(currGameMode);
     LogicLedManager_init();
+=======
+    Game_engine_manager_init();
+>>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
     while (1){};
     
     return NULL;
@@ -40,6 +46,7 @@ void * SensorGameEngineManager_init(){
 void SensorGameEngineManager_cleanup(){
     // assert(isInit);
     // pthread_join(gameThread, NULL);
+    assert(isInit);
 
     printf("here3\n");
     pthread_join(threadId, NULL);

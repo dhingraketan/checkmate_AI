@@ -10,6 +10,7 @@
 
 bool isCheck = false;
 bool isCheckMate = false;
+<<<<<<< HEAD
 char from[3];
 char to[3];
 
@@ -19,6 +20,11 @@ static pthread_t gameManagerThread;
 static char boadStateFenString[MAX_FEN_STRING_LEN] ;
 static int totalMoves  = 1;
 static Piece board[8][8];
+=======
+static bool isInit  = false;
+static char boadStateFenString[MAX_FEN_STRING_LEN] ;
+static int totalMoves  = 1;
+>>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
 static char *fenString[7] =  {"-", "p", "r", "n", "b", "q", "k"}; // this has to match the PieceType enum
 static char returnLine[MAX_FEN_STRING_LEN] = {0};
 
@@ -42,7 +48,11 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
                     emptyCount = 0;
                 }
                 char pieceChar = *fenString[currPiece.type];
+<<<<<<< HEAD
                 
+=======
+
+>>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
                 boadStateFenString[fenIndex++] = 
                     (currPiece.color == WHITE) ? toupper(pieceChar) : pieceChar;
             }
@@ -65,15 +75,19 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
     boadStateFenString[fenIndex++] = ' ';
     bool anyCastle = false;
 
+<<<<<<< HEAD
     if (!anyCastle) boadStateFenString[fenIndex++] = '-';
+=======
+    boadStateFenString[fenIndex++] = '-';
+>>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
 
     // En passant
     boadStateFenString[fenIndex++] = ' ';
-    boadStateFenString[fenIndex++] = '-'; // maybe track this
+    boadStateFenString[fenIndex++] = '-'; 
 
     // Halfmove clock
     boadStateFenString[fenIndex++] = ' ';
-    boadStateFenString[fenIndex++] = '0'; // maybe track this
+    boadStateFenString[fenIndex++] = '0';
 
     // Fullmove number
     boadStateFenString[fenIndex++] = ' '; // change this to have actual move numbers
@@ -86,9 +100,22 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
     char bestmove[6];
     if (strstr(line, "none") != NULL) {
         isCheckMate = true;
+        printf("game is over. checkmate\n");
         return;
     }
+
     printf("this is line %s", line);
+    char *after = strstr(line, "Checkers:");
+
+    if (after) {
+        after += strlen("Checkers:"); 
+        while (*after == ' ') after++; 
+
+        if (*after != '\0') {
+            printf("There is something after Checkers: %s\n", after);
+            isCheck = true;
+        } 
+    }
 
     sscanf(line, "bestmove %4s", bestmove);
 
@@ -99,75 +126,41 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
     to[2] = '\0';
 }
 
-static void * Game_engine_manager_startGameEngine(void * gameMode){
-    int game = *((int*)gameMode);
+void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMoves, char *from, char *to){
+    totalMoves = totalMoves;
+    GameEngineManager_getFenString(boardState);
 
-    gameEngine_init();
+    memset(returnLine, 0, MAX_FEN_STRING_LEN);
 
-    while(1){
+    // send curr pos to stockfish
+    gameEngine_sendCmd(CMD_POSITION, boadStateFenString,returnLine);
+    memset(returnLine, 0, MAX_FEN_STRING_LEN);
 
-        pthread_mutex_lock(&boardMutex);
+    // check for check by the user
+    gameEngine_sendCmd(CMD_D, boadStateFenString,returnLine); 
+    Game_engine_manager_parseOutput(returnLine, from, to);
+    memset(returnLine, 0, MAX_FEN_STRING_LEN);
 
-        while (!isStockfishTurn) {
-            pthread_cond_wait(&stockfishTurnCond, &boardMutex);
-        }
+    // get the best move
+    printf("sending go cmd\n");
+    gameEngine_sendCmd(CMD_GO, NULL,returnLine);
 
-        // pthread_mutex_unlock(&boardMutex);
-        // pthread_mutex_lock(&boardMutex);
+    printf("Bestmove found %s\n ", returnLine);
+    Game_engine_manager_parseOutput(returnLine, from, to);
 
-        copyBoardState(board);
-        // printf("done copying board\n");
-        // printBoard(board);
-        GameEngineManager_getFenString(board);
+    printf("from: %s, to: %s\n", from, to);
 
-        // send updated position to the game engine
-        printf("this is the fenstring\n %s\n", boadStateFenString);
-
-        memset(returnLine, 0, MAX_FEN_STRING_LEN);
-        gameEngine_sendCmd(CMD_POSITION, boadStateFenString,returnLine);
-        memset(returnLine, 0, MAX_FEN_STRING_LEN);
-        gameEngine_sendCmd(CMD_D,boadStateFenString, returnLine);
-        Game_engine_manager_parseOutput(returnLine, from, to);
-        // get the best move
-        // printf("sending go cmd\n");
-        gameEngine_sendCmd(CMD_GO, NULL,returnLine);
-
-        printf("Bestmove found by Stockfish %s\n ", returnLine);
-        Game_engine_manager_parseOutput(returnLine, from, to);
-
-        if(isCheckMate){
-            // change a global variable
-        }
-        else {
-            printf("from: %s, to: %s\n", from, to);
-            // processInput(from);
-            // processInput(to);
-
-            isUserTurn = true;
-            isStockfishTurn = false;
-
-            pthread_cond_signal(&userTurnCond);
-            pthread_mutex_unlock(&boardMutex);
-            totalMoves += 1;
-
-        }
-
-        
-    }
-    return NULL;
 }
 
-
-void Game_engine_manager_init(int gameMode){
+void Game_engine_manager_init(){
     isInit = true;
+    gameEngine_init();
     printf("init game engine manager\n");
-    gameManagerThread = pthread_create(&gameManagerThread, NULL,Game_engine_manager_startGameEngine,(void *) &gameMode);
 
 }
-
 
 
 void Game_engine_manager_cleanup(){
+    gameEngine_cleanup();
     isInit = false;
-    pthread_join(gameManagerThread, NULL);
 }

@@ -153,9 +153,10 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine)
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     else if(cmd == CMD_D){
-        snprintf(cmdText, BUFFER_SIZE, "d");
+        printf("sending d cmd\n");
+        snprintf(cmdText, BUFFER_SIZE, "d\n");
     }
-    // printf("talking\n");
+    printf("talking\n");
 
     gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
     // printf("talking done\n");

@@ -11,15 +11,8 @@ typedef enum  {
 } GAME_MODE;
 
 
-extern pthread_cond_t stockfishTurnCond;
-extern pthread_cond_t userTurnCond;
-extern bool isStockfishTurn;
-extern bool isUserTurn;
 extern bool isCheck;
 extern bool isCheckMate;
-extern char *gameEngineMoveFrom;
-extern char *gameEngineMoveTo;
-extern pthread_mutex_t boardMutex;
 
 
 void * SensorGameEngineManager_init();

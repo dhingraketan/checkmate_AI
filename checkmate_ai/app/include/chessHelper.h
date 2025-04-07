@@ -1,3 +1,5 @@
+#ifndef _CHESS_HELPER_H
+#define _CHESS_HELPER_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,3 +53,5 @@ void copyPossibleMoves(int dest[8][8]);
 void chessHelper_cleanup();
 
 bool chessHelper_getIsValidMove();
+
+#endif
