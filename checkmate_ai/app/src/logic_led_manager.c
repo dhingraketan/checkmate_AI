@@ -6,23 +6,16 @@
 
 #define NEO_NUM_LEDS 128
 static bool isInit = false;
-static int possible[8][8];
 static int colorArr[128];
-static pthread_t threadId;
 
-static void LogicLedManager_writeColorArr(LIGHT_UP *leds){
+static void LogicLedManager_writeColorArr(LIGHT_UP *leds, int count){
     assert(isInit);
 
-    bool isValid = chessHelper_getIsValidMove();
-
-    int indx = 0;
-    int colors[NEO_NUM_LEDS] = {0};
+    int colors[NEO_NUM_LEDS] = {COLOR_NONE};
 
     if(leds != NULL){
-        int count = sizeof(leds)/sizeof(leds[0]);
-
         for(int i = 0; i<count; i++){
-            int ledIndx = (((8 * leds[i].row) + leds[i].col) *2 )- 2;
+            int ledIndx = (((8 * leds[i].row) + leds[i].col) *2 ) - 2;
             colors[ledIndx] = leds[i].colorName;
         }
     }
@@ -30,34 +23,28 @@ static void LogicLedManager_writeColorArr(LIGHT_UP *leds){
 }
 
 
-
-//     if(isValid){
-//         for(int i = 0; i < 8; i++){
-//             for(int j = 0; j < 8; j++){
-//                 if(possible[i][j]){
-//                     colorArr[indx++] = COLOR_WHITE;
-//                 }
-//                 else {
-//                     colorArr[indx++] = COLOR_NONE;
-//                 }
-//                 colorArr[indx++] = COLOR_NONE;
-//             }
-//         }
-//     }
-//     else {
-//         for(int i = 0; i < 8; i++){
-//             for(int j = 0; j < 8; j++){
-//                 colorArr[indx++] = COLOR_RED;
-//                 colorArr[indx++] = COLOR_NONE;
-//             }
-//         }
-//     }
-// }
-
-void LogicLedManager_changeColor(LIGHT_UP *leds){
+void LogicLedManager_changeColor(LIGHT_UP *leds, int count){
     assert(isInit);
+    printf("logic led manager change color %d\n", count);
 
-    LogicLedManager_writeColorArr(leds);
+    LogicLedManager_writeColorArr(leds, count);
+    led_changeLedColor(colorArr);
+}
+
+void LogicLedManager_turnAllColor(LED_COLOR_NAME ledColor){
+    assert(isInit);
+    printf("calling change all color logic led manager\n");
+
+    int colors[NEO_NUM_LEDS] = {COLOR_NONE};
+
+    for(int i = 0; i < NEO_NUM_LEDS; i++){
+        if(i % 2 == 1){
+            colors[i] = ledColor;
+        }
+    }
+
+    memcpy(colorArr, colors, sizeof(colorArr));
+    printf("logic led manager turn all color color %d\n");
     led_changeLedColor(colorArr);
 }
 
@@ -95,5 +82,6 @@ void LogicLedManager_cleanup(){
 
     isInit = false;
     led_cleanup();
+    printf("led manager cleanup\n");
     // pthread_join(threadId, NULL);
 }

@@ -5,12 +5,12 @@
 #include <stdint.h>
 
 typedef enum {
-    COLOR_WHITE = 0,
+    COLOR_NONE = 0,
+    COLOR_WHITE,
     COLOR_RED,
     COLOR_GREEN,
     COLOR_BLUE,
     COLOR_YELLOW,
-    COLOR_NONE,
     COLOR_NUM,
 } LED_COLOR_NAME;
 

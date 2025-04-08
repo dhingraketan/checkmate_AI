@@ -10,13 +10,12 @@
 static bool isInit = false;
 
 static LED_Color colorInfo[6] = {
-    { .colorName = COLOR_WHITE, .colorHex = 0x0f0f0f00 },
-    { .colorName = COLOR_RED,   .colorHex = 0x000f0000 },
-    { .colorName = COLOR_GREEN, .colorHex = 0x0f000000 },
-    { .colorName = COLOR_BLUE,  .colorHex = 0x00000f00 },
-    { .colorName = COLOR_YELLOW,.colorHex = 0x0f0f0000 },
     { .colorName = COLOR_NONE,  .colorHex = 0x00000000 },
-
+    { .colorName = COLOR_WHITE, .colorHex = 0xffffff00 },
+    { .colorName = COLOR_RED,   .colorHex = 0x00ff0000 },
+    { .colorName = COLOR_GREEN, .colorHex = 0xff000000 },
+    { .colorName = COLOR_BLUE,  .colorHex = 0x0000ff00 },
+    { .colorName = COLOR_YELLOW,.colorHex = 0x0f0f000f },
 };
 
 static uint32_t colors[NEO_NUM_LEDS] = {0x0};
@@ -40,6 +39,7 @@ void led_changeLedColor(int *colorArr){
     printf("inside led change color\n");
     for(int i = 0; i< NEO_NUM_LEDS; i++){
         colors[i] = colorInfo[colorArr[i]].colorHex;
+        // printf("colors[%d] = %d\n", i, colorArr[i]);
     }    
     sharedMem_changeLed(colors);
 }

@@ -19,8 +19,8 @@ typedef struct {
 
 void LogicLedManager_init();
 void LogicLedManager_cleanup();
-void LogicLedManager_changeColor(LIGHT_UP *leds);
-
+void LogicLedManager_changeColor(LIGHT_UP *leds, int count);
+void LogicLedManager_turnAllColor(LED_COLOR_NAME ledColor);
 
 
 #endif

@@ -10,21 +10,9 @@
 
 bool isCheck = false;
 bool isCheckMate = false;
-<<<<<<< HEAD
-char from[3];
-char to[3];
-
-
-static bool isInit  = false;
-static pthread_t gameManagerThread; 
-static char boadStateFenString[MAX_FEN_STRING_LEN] ;
-static int totalMoves  = 1;
-static Piece board[8][8];
-=======
 static bool isInit  = false;
 static char boadStateFenString[MAX_FEN_STRING_LEN] ;
 static int totalMoves  = 1;
->>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
 static char *fenString[7] =  {"-", "p", "r", "n", "b", "q", "k"}; // this has to match the PieceType enum
 static char returnLine[MAX_FEN_STRING_LEN] = {0};
 
@@ -48,11 +36,6 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
                     emptyCount = 0;
                 }
                 char pieceChar = *fenString[currPiece.type];
-<<<<<<< HEAD
-                
-=======
-
->>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
                 boadStateFenString[fenIndex++] = 
                     (currPiece.color == WHITE) ? toupper(pieceChar) : pieceChar;
             }
@@ -75,11 +58,7 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
     boadStateFenString[fenIndex++] = ' ';
     bool anyCastle = false;
 
-<<<<<<< HEAD
-    if (!anyCastle) boadStateFenString[fenIndex++] = '-';
-=======
     boadStateFenString[fenIndex++] = '-';
->>>>>>> f9dc0a4 (Removed locks from stockfish and added checkmate checl)
 
     // En passant
     boadStateFenString[fenIndex++] = ' ';
@@ -104,7 +83,6 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
         return;
     }
 
-    printf("this is line %s", line);
     char *after = strstr(line, "Checkers:");
 
     if (after) {
@@ -161,6 +139,7 @@ void Game_engine_manager_init(){
 
 
 void Game_engine_manager_cleanup(){
+    printf("Game engine manager cleanup\n");
     gameEngine_cleanup();
     isInit = false;
 }

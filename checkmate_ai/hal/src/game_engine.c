@@ -101,7 +101,6 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
 
     // printf("reading\n");
     if(lookFor != NULL && lookFor[0] != '\0'){
-        printf("going back\n");
         while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
             readBuffer[bytes_read] = '\0';
             // printf("curr %s", readBuffer);
@@ -111,7 +110,6 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
                 char *line = strtok(readBuffer, "\n");
                 while (line != NULL) {
                     if (strstr(line, lookFor)) {
-                        printf("Found in line: %s\n", line);
                         strncpy(lineFound, line, strlen(line));
                         break;
                     }
@@ -124,7 +122,6 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
 
         }
     }
-    printf("done writing and reading \n");
 }
 
 
@@ -153,10 +150,8 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine)
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     else if(cmd == CMD_D){
-        printf("sending d cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "d\n");
     }
-    printf("talking\n");
 
     gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
     // printf("talking done\n");
