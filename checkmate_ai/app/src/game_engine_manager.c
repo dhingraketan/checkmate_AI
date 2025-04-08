@@ -1,15 +1,14 @@
 #include "game_engine_manager.h"
-#include "sensor_game_engine_manager.h"
-#include "chessHelper.h"
 #include "game_engine.h"
+#include "ChessEngine.h"
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <string.h>
+#include <ctype.h>
 
 #define MAX_FEN_STRING_LEN 128
 
-bool isCheck = false;
-bool isCheckMate = false;
 static bool isInit  = false;
 static char boadStateFenString[MAX_FEN_STRING_LEN] ;
 static int totalMoves  = 1;
@@ -37,7 +36,7 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
                 }
                 char pieceChar = *fenString[currPiece.type];
                 boadStateFenString[fenIndex++] = 
-                    (currPiece.color == WHITE) ? toupper(pieceChar) : pieceChar;
+                    (currPiece.color == COLOR_WHITE) ? toupper(pieceChar) : pieceChar;
             }
         }
         
@@ -52,11 +51,10 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
 
     // Active color
     boadStateFenString[fenIndex++] = ' ';
-    boadStateFenString[fenIndex++] = getCurrentTurnString();
+    boadStateFenString[fenIndex++] = GameController_getCurrTurnString();
 
     // Castling availability
     boadStateFenString[fenIndex++] = ' ';
-    bool anyCastle = false;
 
     boadStateFenString[fenIndex++] = '-';
 
@@ -75,11 +73,11 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
     boadStateFenString[MAX_FEN_STRING_LEN-1] = '\0';
 }
 
-static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
+static void Game_engine_manager_parseOutput(char *line, char *from, char *to, bool *isCheck, bool *isCheckMate){
     char bestmove[6];
     printf("this is line %s\n", line);
     if (strstr(line, "none") != NULL) {
-        isCheckMate = true;
+        *isCheckMate = true;
         printf("game is over. checkmate\n");
         return;
     }
@@ -92,7 +90,7 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
 
         if (*after != '\0') {
             printf("There is something after Checkers: %s\n", after);
-            isCheck = true;
+            *isCheck = true;
         } 
     }
 
@@ -105,7 +103,7 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
     to[2] = '\0';
 }
 
-void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMoves, char *from, char *to){
+void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMoves, char *from, char *to, bool *isCheck, bool *isCheckMate){
     totalMoves = totalMoves;
     GameEngineManager_getFenString(boardState);
     printf("this is the fen string %s\n", boadStateFenString);
@@ -116,9 +114,9 @@ void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMove
     gameEngine_sendCmd(CMD_POSITION, boadStateFenString,returnLine);
     memset(returnLine, 0, MAX_FEN_STRING_LEN);
 
-    // check for check by the user
+    // check for check by the user to the game engine
     gameEngine_sendCmd(CMD_D, boadStateFenString,returnLine); 
-    Game_engine_manager_parseOutput(returnLine, from, to);
+    Game_engine_manager_parseOutput(returnLine, from, to, isCheck, isCheckMate);
     memset(returnLine, 0, MAX_FEN_STRING_LEN);
 
     // get the best move
@@ -126,7 +124,7 @@ void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMove
     gameEngine_sendCmd(CMD_GO, NULL,returnLine);
 
     printf("Bestmove found %s\n ", returnLine);
-    Game_engine_manager_parseOutput(returnLine, from, to);
+    Game_engine_manager_parseOutput(returnLine, from, to, isCheck, isCheckMate);
 
     printf("from: %s, to: %s\n", from, to);
 

@@ -1,8 +1,8 @@
 #include "logic_led_manager.h"
 #include "led_controller.h"
-#include "chessHelper.h"
 #include "pthread.h"
 #include "assert.h"
+#include <string.h>
 
 #define NEO_NUM_LEDS 128
 static bool isInit = false;
@@ -19,7 +19,7 @@ static int LogicManager_findLedNumber(int row, int col){
 static void LogicLedManager_writeColorArr(LIGHT_UP *leds, int count){
     assert(isInit);
 
-    int colors[NEO_NUM_LEDS] = {COLOR_NONE};
+    int colors[NEO_NUM_LEDS] = {LED_COLOR_NONE};
 
     if(leds != NULL){
         for(int i = 0; i<count; i++){
@@ -40,11 +40,11 @@ void LogicLedManager_changeColor(LIGHT_UP *leds, int count){
     led_changeLedColor(colorArr);
 }
 
-void LogicLedManager_turnAllColor(LED_COLOR_NAME ledColor){
+void LogicLedManager_turnAllLeds(LED_COLOR_NAME ledColor){
     assert(isInit);
     printf("calling change all color logic led manager\n");
 
-    int colors[NEO_NUM_LEDS] = {COLOR_NONE};
+    int colors[NEO_NUM_LEDS] = {LED_COLOR_NONE};
 
     for(int i = 0; i < NEO_NUM_LEDS; i++){
         if(i % 2 == 0){ // every even led gets color
@@ -72,9 +72,9 @@ void LogicLedManager_makeStructForMove(LIGHT_UP *leds, char *from, char *to){
 
     ledFrom.col = fromCol;
     ledFrom.row = fromRow;
-    ledFrom.colorName = COLOR_WHITE;
+    ledFrom.colorName = LED_COLOR_WHITE;
 
-    ledTo.colorName = COLOR_WHITE;
+    ledTo.colorName = LED_COLOR_WHITE;
     ledTo.col = toCol;
     ledTo.row = toRow;
 
@@ -88,8 +88,8 @@ void LogicLedManager_makeStructForPossibleMoves(LIGHT_UP *led, int *count, int b
         for(int j = 0; j < 8; j++){
             // printf("Possible[%d][%d] = %d\n", i, j , possible[i][j]);
             if(board[i][j]){
-                LIGHT_UP possibleMoveLed = {i, j , COLOR_WHITE};
-                printf("light up %d %d = %d", i, j , COLOR_WHITE);
+                LIGHT_UP possibleMoveLed = {i, j , LED_COLOR_WHITE};
+                printf("light up %d %d = %d", i, j , LED_COLOR_WHITE);
                 led[indx] = possibleMoveLed;
                 indx++;
             }
@@ -97,6 +97,14 @@ void LogicLedManager_makeStructForPossibleMoves(LIGHT_UP *led, int *count, int b
     }
     *count = indx;
 }
+
+void LogicLedManager_makeStructForOneLed(LIGHT_UP *leds, int row, int col, int *count, LED_COLOR_NAME colorName){
+    leds->row = row;
+    leds->col = col;
+    leds->colorName = colorName;
+    *count = 1;
+}
+
 void LogicLedManager_init(){
     isInit = true;
     led_init();

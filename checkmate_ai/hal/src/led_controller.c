@@ -10,12 +10,12 @@
 static bool isInit = false;
 
 static LED_Color colorInfo[6] = {
-    { .colorName = COLOR_NONE,  .colorHex = 0x00000000 },
-    { .colorName = COLOR_WHITE, .colorHex = 0xffffff00 },
-    { .colorName = COLOR_RED,   .colorHex = 0x00ff0000 },
-    { .colorName = COLOR_GREEN, .colorHex = 0xff000000 },
-    { .colorName = COLOR_BLUE,  .colorHex = 0x0000ff00 },
-    { .colorName = COLOR_YELLOW,.colorHex = 0x0f0f000f },
+    { .colorName = LED_COLOR_NONE,  .colorHex = 0x00000000 },
+    { .colorName = LED_COLOR_WHITE, .colorHex = 0xffffff00 },
+    { .colorName = LED_COLOR_RED,   .colorHex = 0x00ff0000 },
+    { .colorName = LED_COLOR_GREEN, .colorHex = 0xff000000 },
+    { .colorName = LED_COLOR_BLUE,  .colorHex = 0x0000ff00 },
+    { .colorName = LED_COLOR_YELLOW,.colorHex = 0x0f0f000f },
 };
 
 static uint32_t colors[NEO_NUM_LEDS] = {0x0};

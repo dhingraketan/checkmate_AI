@@ -79,3 +79,27 @@
     
 //     return 0;
 // }
+
+#include "GameController.h"
+#include "LCDPrinter.h"
+#include "BoardReader.h"
+#include "logic_led_manager.h"
+#include "game_engine_manager.h"
+
+int main(){
+    boardReader_init();
+    lcd_printer_init();
+    // ADDED:
+    LogicLedManager_init();
+    Game_engine_manager_init();
+
+    GameController_init();
+    GameController_cleanup();
+
+
+    // ADDED:
+    Game_engine_manager_cleanup();
+    LogicLedManager_cleanup();
+
+    
+}

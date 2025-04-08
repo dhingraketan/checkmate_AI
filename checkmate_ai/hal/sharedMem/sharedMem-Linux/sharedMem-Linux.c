@@ -49,26 +49,26 @@ void freeR5MmapAddr()
     }
 }
 
-static void sharedMem_readColorsFromMem(){
-    for(int i = 0; i< 30;i++){
-        printf("read loop count %u\n", MEM_UINT32(((uint8_t*)pR5Base + LOOP_COUNT_OFFSET)));
-    }
-    printf("reading what r5 has\n");
-    for(int i = 0; i<4; i++){
-        for(int i = 0; i< NEO_NUM_LEDS; i++){
-            uint32_t color = MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
-            printf("%d - 0x%08x\n", i, color);
-        }
-    }
-    int count = 0;
-    while(1){
-        uint32_t myColor = (count %2 == 0) ? 0x000f0000 : 0x00000f00;
-        // printf("Changing color to 0x%08x\n", myColor);
-        MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (3 * sizeof(uint32_t))) = myColor;
-        count++;
-        sleep(1);
-    }
-}
+// static void sharedMem_readColorsFromMem(){
+//     for(int i = 0; i< 30;i++){
+//         printf("read loop count %u\n", MEM_UINT32(((uint8_t*)pR5Base + LOOP_COUNT_OFFSET)));
+//     }
+//     printf("reading what r5 has\n");
+//     for(int i = 0; i<4; i++){
+//         for(int i = 0; i< NEO_NUM_LEDS; i++){
+//             uint32_t color = MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (i * sizeof(uint32_t)));
+//             printf("%d - 0x%08x\n", i, color);
+//         }
+//     }
+//     int count = 0;
+//     while(1){
+//         uint32_t myColor = (count %2 == 0) ? 0x000f0000 : 0x00000f00;
+//         // printf("Changing color to 0x%08x\n", myColor);
+//         MEM_UINT32(((int8_t *)pR5Base + ARR_OFFSET) + (3 * sizeof(uint32_t))) = myColor;
+//         count++;
+//         sleep(1);
+//     }
+// }
 
 void sharedMem_init(){
     // printf("init sharedmem\n");

@@ -24,5 +24,6 @@ GameMode GameController_getGameMode();
 Player GameController_getTurn();
 Player GameController_getWinner();
 void GameController_getGameStatus(Game_Status *status);
+char GameController_getCurrTurnString();
 
 #endif

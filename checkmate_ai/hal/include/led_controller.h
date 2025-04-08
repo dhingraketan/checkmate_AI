@@ -5,13 +5,13 @@
 #include <stdint.h>
 
 typedef enum {
-    COLOR_NONE = 0,
-    COLOR_WHITE,
-    COLOR_RED,
-    COLOR_GREEN,
-    COLOR_BLUE,
-    COLOR_YELLOW,
-    COLOR_NUM,
+    LED_COLOR_NONE = 0,
+    LED_COLOR_WHITE,
+    LED_COLOR_RED,
+    LED_COLOR_GREEN,
+    LED_COLOR_BLUE,
+    LED_COLOR_YELLOW,
+    LED_COLOR_NUM,
 } LED_COLOR_NAME;
 
 typedef struct {

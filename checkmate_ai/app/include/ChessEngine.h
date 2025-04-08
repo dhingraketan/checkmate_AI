@@ -38,5 +38,7 @@ void ChessEngine_getState(Piece dest[8][8]);
 bool ChessEngine_isPieceInAir();
 void ChessEngine_getPickupSquare(int *row, int *col);
 bool ChessEngine_isGameOver();
+// ADDED:
+void ChessEngine_getPossibleState(int dest[8][8]);
 
 #endif

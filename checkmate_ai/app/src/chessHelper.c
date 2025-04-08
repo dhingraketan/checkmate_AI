@@ -406,7 +406,7 @@ void *chessGameThread(void *arg) {
 
     // Initialize the board.
     initializeBoard();
-    LogicLedManager_turnAllColor(COLOR_RED);
+    LogicLedManager_turnAllLeds(LED_COLOR_RED);
     
 
     while (!gameOver) {
@@ -478,7 +478,7 @@ void *chessGameThread(void *arg) {
         if(currentTurn == BLACK){
             // ask stock fish to make a move
             printf("Asking stockfish to make a move\n");
-            Game_engine_manager_processBoardState(board, totalMoves, from, to);
+            Game_engine_manager_processBoardState(board, totalMoves, from, to, &isCheck, &isCheckMate);
             LIGHT_UP leds[2] = {0};
             LogicLedManager_makeStructForMove(leds, from, to);
             LogicLedManager_changeColor(leds,2);
@@ -494,7 +494,7 @@ void *chessGameThread(void *arg) {
 
         printf("checking for check and check mate\n");
         // check for check and check mate - this also gets the best move if a move is possible
-        Game_engine_manager_processBoardState(board, totalMoves, from, to);
+        Game_engine_manager_processBoardState(board, totalMoves, from, to, &isCheck, &isCheckMate);
 
         if(isCheck){
             // show move by lighting up lights
@@ -502,12 +502,12 @@ void *chessGameThread(void *arg) {
             LIGHT_UP leds[2] = {0};
             LogicLedManager_makeStructForMove(leds, from , to);
             LogicLedManager_changeColor(leds, 2);
-            LogicLedManager_turnAllColor(COLOR_RED);
+            LogicLedManager_turnAllLeds(LED_COLOR_RED);
         }
 
         if(isCheckMate){
             gameOver = true;
-            LogicLedManager_turnAllColor(COLOR_GREEN);
+            LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
             // turn leds red
         }
 

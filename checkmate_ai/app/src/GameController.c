@@ -14,9 +14,12 @@
 #include "LCDPrinter.h"
 #include "gpio.h"
 #include "btn_statemachine.h"
+#include "game_engine_manager.h"
+#include "logic_led_manager.h"
 
 #define MAX_HELP_PER_PLAYER 5
 #define MAX_TIME_IN_SEC 600 // 10 minutes
+#define NEO_NUM_LEDS 64
 
 // static int whiteHelpCount = 0;
 // static int blackHelpCount = 0;
@@ -32,10 +35,20 @@ static int blackTimeRemaining = MAX_TIME_IN_SEC;
 static Player winner = 2;
 static bool gameOver = false;
 static bool isGameModeSet = false;
+// ADDED:
+static char from[3];
+static char to[3];
+static bool isUserInCheck = false;
+static bool isUserInCheckmate = false;
+static bool isEngineInCheck = false;
+static bool isEngineInCheckmate = false;
+
 
 static pthread_t gameThread;
 
 static uint8_t prevState[8][8] = {0};
+
+static int totalMoves = 0;
 
 GameMode GameController_getGameMode(){
     pthread_mutex_lock(&gameModeMutex);
@@ -119,6 +132,41 @@ static void GameController_setGameMode(){
 
 }
 
+// ADDED:
+static void checkIfCurrUserIsInCheckOrCheckmate(){
+        // ADDED:
+        // want to check after every turn (AI's or human's (in case of V1V)), if there was a check/checkmate
+        Piece boardState[8][8];
+        ChessEngine_getState(boardState); 
+        Game_engine_manager_processBoardState(boardState, totalMoves, from, to, &isUserInCheck, &isUserInCheckmate);
+
+        if(isUserInCheck){
+            // show move by lighting up lights
+            printf("%d is in check\n",turn);
+            isUserInCheck = false;
+            
+            // light up led of the king of the player who is in check
+
+            // functionality to show the best move they can make
+            // the move is already in from and to chars
+            printf("Stockfish recommends from %s to %s", from, to);
+
+            LIGHT_UP leds[2] = {0};
+            LogicLedManager_makeStructForMove(leds, from , to);
+            LogicLedManager_changeColor(leds, 2);
+
+
+        }
+
+        // ADDED:
+        if(isUserInCheckmate){
+            gameOver = true;
+            winner = !turn;
+            printf("Winnner is %d\n", winner);
+            LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
+        }
+}
+
 
 static void waitUntilPieceReturnedToOriginalSquare() {
     
@@ -144,17 +192,24 @@ static void waitUntilPieceReturnedToOriginalSquare() {
 }
 
 void* GameController_startGame() {
-    ChessEngine_init();
+    // ChessEngine_init();
 
     while (!gameOver) {
         printf("\nTurn: %s\n", (turn == PLAYER_WHITE ? "WHITE" : "BLACK"));
         long turnStartTime = GameController_getCurrentTime();
 
+        // ADDED:
+        // maybe we dont need the conditional because this is the only loop that actually 
+        // detects changes in the sensors
+        // in case of ONE V AI and it being AIs turn. AI has decided the move but the player has 
+        // to make the physical move - but this conditional is not activated then 
+    
         if (gameMode == ONE_V_ONE || (gameMode == ONE_V_AI && turn == PLAYER_WHITE)) {
             int rank, file;
             MoveResult result;
 
             boardReader_getState(prevState);
+
             while (1) {
                 if (!ChessEngine_isPieceInAir()) {
                     // Wait for pickup
@@ -163,10 +218,31 @@ void* GameController_startGame() {
 
                         if (result == MOVE_PICKUP_VALID) {
                             // Now wait for drop in next loop
+                            // ADDED:
+                            // show possible moves via the led
+                            int possibleState[8][8];
+                            ChessEngine_getPossibleState(possibleState);
+                            LIGHT_UP leds[NEO_NUM_LEDS] = {0};
+                            int count; 
+                            LogicLedManager_makeStructForPossibleMoves(leds, &count, possibleState);
+                            LogicLedManager_changeColor(leds, count);
+
                         } else if (result == MOVE_PICKUP_INVALID) {
                             printf("Invalid pickup. Please return the piece to its original square.\n");
+                            // ADDED:
+                            // led should light up for invalid move - assuming rank is row and file is col of the 
+                            // selected piece
+                            LIGHT_UP led = {0};
+                            int count;
+                            LogicLedManager_makeStructForOneLed(&led, rank, file, &count, LED_COLOR_RED);
+                            LogicLedManager_changeColor(&led, count);
+
                             waitUntilPieceReturnedToOriginalSquare();
                             printf("Piece returned. Try again.\n");
+                            // ADDED: 
+                            // switch off the red led once the piece is returned
+
+
                         }
                     }
                 } else {
@@ -175,6 +251,8 @@ void* GameController_startGame() {
                         result = ChessEngine_ProcessMove(rank, file, turn);
 
                         if (result == MOVE_DROP_VALID) {
+                            // ADDED: Turn off led 
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             break;
                         } else if (result == MOVE_CAPTURE) {
                             printf("Piece captured!\n");
@@ -184,11 +262,21 @@ void* GameController_startGame() {
                             break;
                         } else if (result == MOVE_GAME_OVER) {
                             gameOver = true;
+                            // ADDED:
+                            // leds turn on to show game over
                             break;
                         } else if (result == MOVE_DROP_INVALID) {
                             printf("Invalid drop. Please return the piece to its original square.\n");
+                            // ADDED:
+                            // leds turn on to show invalid
+                            LogicLedManager_turnAllLeds(LED_COLOR_RED);
+
                             waitUntilPieceReturnedToOriginalSquare();
                             printf("Piece returned. Try again.\n");
+
+                            // ADDED:
+                            // switch off led
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                         } else if (result == MOVE_CANCELLED) {
                             printf("Move cancelled. Re-pick a piece.\n");
                         }
@@ -200,9 +288,38 @@ void* GameController_startGame() {
 
         } else {
             // --- AI Turn ---
+            // ADDED:
             printf("AI thinking...\n");
-            sleep(1);
-            printf("AI move completed.\n");
+            Piece boardState[8][8];
+            ChessEngine_getState(boardState); // get the currstate to send to stockfish  
+            // also checks if the engine is in check/checkmate by the user          
+            Game_engine_manager_processBoardState(boardState, totalMoves, from, to, &isEngineInCheck, &isEngineInCheckmate);
+
+            if(isEngineInCheckmate){
+                // ADDED: 
+                // user has won show green led all over and end game
+                LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
+                gameOver = true;
+
+            }
+
+            if(isEngineInCheck){
+                // ADDED:
+                // show some light -- maybe black king had red light
+                isEngineInCheck = false;
+            }
+             
+
+            // if engine is in checkmate there are no moves
+            if(!isEngineInCheckmate) {
+                // not a check/checkmate, process stockfish move
+                LIGHT_UP leds[2] = {0};
+                LogicLedManager_makeStructForMove(leds, from, to);
+                LogicLedManager_changeColor(leds,2);
+
+                sleep(1);
+                printf("AI move completed.\n");
+            }
 
             // TODO: Replace with actual Stockfish move
         }
@@ -229,6 +346,8 @@ void* GameController_startGame() {
             }
         }
 
+        // ADDED: dont think this will work because you never actually capture the king
+        // its a check mate when the next move is a capture 
         if (ChessEngine_isGameOver()) {
             printf("Game Over! %s's King captured.\n", (turn == PLAYER_WHITE ? "WHITE" : "BLACK"));
             gameOver = true;
@@ -236,13 +355,28 @@ void* GameController_startGame() {
         }
 
         toggleTurn(); // ✅ Only toggled after full pickup-drop turn
+
+        // ADDED:
+        totalMoves +=1;
+
+        if(gameMode == ONE_V_ONE || (gameMode == ONE_V_AI && turn == PLAYER_WHITE) ){
+            checkIfCurrUserIsInCheckOrCheckmate();
+        }
+
+       
     }
 
-    winner = (turn == PLAYER_WHITE) ? PLAYER_BLACK : PLAYER_WHITE;
+    // ADDED:
+    // commented it to be in sync with stockfish code
+    // winner = (turn == PLAYER_WHITE) ? PLAYER_BLACK : PLAYER_WHITE;
     printf("Game Over! Winner: %s\n", winner == PLAYER_WHITE ? "WHITE" : "BLACK");
 
     lcd_printer_toogle_screen(RESULT_SCREEN);
     return NULL;
+}
+
+char GameController_getCurrTurnString(){
+    return (turn == PLAYER_WHITE) ? 'w' : 'b';
 }
 
 

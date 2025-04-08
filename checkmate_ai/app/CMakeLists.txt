@@ -2,6 +2,7 @@
 
 include_directories(include)
 file(GLOB MY_SOURCES "src/*.c" )
+list(REMOVE_ITEM MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/chessHelper.c")
 
 add_executable(extender ${MY_SOURCES})
 

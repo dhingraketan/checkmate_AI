@@ -20,9 +20,10 @@ typedef struct {
 void LogicLedManager_init();
 void LogicLedManager_cleanup();
 void LogicLedManager_changeColor(LIGHT_UP *leds, int count);
-void LogicLedManager_turnAllColor(LED_COLOR_NAME ledColor);
+void LogicLedManager_turnAllLeds(LED_COLOR_NAME ledColor);
 void LogicLedManager_makeStructForPossibleMoves(LIGHT_UP *led, int *count, int board[8][8]);
 void LogicLedManager_makeStructForMove(LIGHT_UP *leds, char *from, char *to);
+void LogicLedManager_makeStructForOneLed(LIGHT_UP *leds, int row, int col, int *count, LED_COLOR_NAME colorName);
 
 
 #endif
