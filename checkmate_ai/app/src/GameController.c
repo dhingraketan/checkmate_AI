@@ -35,6 +35,8 @@ static bool isGameModeSet = false;
 
 static pthread_t gameThread;
 
+static uint8_t prevState[8][8] = {0};
+
 GameMode GameController_getGameMode(){
     pthread_mutex_lock(&gameModeMutex);
     GameMode mode = gameMode;
@@ -117,36 +119,28 @@ static void GameController_setGameMode(){
 
 }
 
-static bool pieceReturnedToOriginalSquare() {
-    int row, col;
-    ChessEngine_getPickupSquare(&row, &col);
 
-    if (row < 0 || row >= 8 || col < 0 || col >= 8) {
-        // Invalid square, nothing to check
-        return false;
-    }
-
-    uint8_t sensorState[8][8];
-    boardReader_getState(sensorState);
-
-    return sensorState[row][col] == 1;
-}
-
-static bool waitUntilPieceReturnedToOriginalSquare(int timeout_ms) {
-    const int interval_us = 50000;
-    int waited_ms = 0;
-
-    while (!pieceReturnedToOriginalSquare()) {
-        usleep(interval_us);
-        waited_ms += interval_us / 1000;
-
-        if (waited_ms >= timeout_ms) {
-            printf("Timeout while waiting for piece return.\n");
-            return false;
+static void waitUntilPieceReturnedToOriginalSquare() {
+    
+    uint8_t currState [8][8];
+    
+    while (1) {
+        boardReader_getState(currState);
+        bool pieceReturned = true;
+        for (int rank = 0; rank < 8; rank++) {
+            for (int file = 0; file < 8; file++) {
+                if (prevState[rank][file] != currState[rank][file]) {
+                    pieceReturned = false;
+                    break;
+                }
+            }
+            if (!pieceReturned) break;
         }
-    }
 
-    return true;
+        if (pieceReturned) break;
+
+        usleep(10000);
+    }
 }
 
 void* GameController_startGame() {
@@ -160,7 +154,7 @@ void* GameController_startGame() {
             int rank, file;
             MoveResult result;
 
-            // Wait until a full move (pickup + drop) is done
+            boardReader_getState(prevState);
             while (1) {
                 if (!ChessEngine_isPieceInAir()) {
                     // Wait for pickup
@@ -171,11 +165,7 @@ void* GameController_startGame() {
                             // Now wait for drop in next loop
                         } else if (result == MOVE_PICKUP_INVALID) {
                             printf("Invalid pickup. Please return the piece to its original square.\n");
-                            if (!waitUntilPieceReturnedToOriginalSquare(5000)) {
-                                // Optional: recover from stuck state
-                                printf("Proceeding after timeout.\n");
-                                // Could add a ChessEngine_resetInAir() here if you want to clear internal engine state
-                            }
+                            waitUntilPieceReturnedToOriginalSquare();
                             printf("Piece returned. Try again.\n");
                         }
                     }
@@ -197,11 +187,7 @@ void* GameController_startGame() {
                             break;
                         } else if (result == MOVE_DROP_INVALID) {
                             printf("Invalid drop. Please return the piece to its original square.\n");
-                            if (!waitUntilPieceReturnedToOriginalSquare(5000)) {
-                                // Optional: recover from stuck state
-                                printf("Proceeding after timeout.\n");
-                                // Could add a ChessEngine_resetInAir() here if you want to clear internal engine state
-                            }
+                            waitUntilPieceReturnedToOriginalSquare();
                             printf("Piece returned. Try again.\n");
                         } else if (result == MOVE_CANCELLED) {
                             printf("Move cancelled. Re-pick a piece.\n");
