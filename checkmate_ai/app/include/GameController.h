@@ -1,16 +1,12 @@
 #ifndef _GAME_CONTROLLER_H_
 #define _GAME_CONTROLLER_H_
 
+#include "ChessEngine.h"
+
 typedef enum {
     ONE_V_ONE,
     ONE_V_AI
 } GameMode;
-
-typedef enum {
-    PLAYER_WHITE,
-    PLAYER_BLACK
-
-} Player;
 
 typedef struct {
 
@@ -22,6 +18,7 @@ typedef struct {
 } Game_Status;
 
 void GameController_init();
+void GameController_cleanup();
 
 GameMode GameController_getGameMode();
 Player GameController_getTurn();

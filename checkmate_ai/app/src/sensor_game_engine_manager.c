@@ -43,10 +43,10 @@ void SensorGameEngineManager_cleanup(){
     isInit = false;
 }
 
-int main(){
-    printf("here2\n");
-    boardReader_init();
-    pthread_create(&threadId, NULL, SensorGameEngineManager_init, NULL);
+// int main(){
+//     printf("here2\n");
+//     boardReader_init();
+//     pthread_create(&threadId, NULL, SensorGameEngineManager_init, NULL);
 
-    SensorGameEngineManager_cleanup();
-}
+//     SensorGameEngineManager_cleanup();
+// }
