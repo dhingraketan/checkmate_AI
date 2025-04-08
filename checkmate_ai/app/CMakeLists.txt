@@ -2,9 +2,15 @@
 
 include_directories(include)
 file(GLOB MY_SOURCES "src/*.c" )
-list(REMOVE_ITEM MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/chessHelper.c")
+# file(GLOB TIME_SOURCES   "src/timer.c" "src/testTimer.c" )
 
+list(REMOVE_ITEM MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/chessHelper.c")
+list(REMOVE_ITEM MY_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/testTimer.c")
+
+
+# add_executable(extender ${MY_SOURCES})
 add_executable(extender ${MY_SOURCES})
+
 
 # Make use of the HAL library
 target_link_libraries(extender LINK_PRIVATE hal)

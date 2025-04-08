@@ -1,7 +1,9 @@
 #ifndef _GAME_CONTROLLER_H_
 #define _GAME_CONTROLLER_H_
 
+#include "timer.h"
 #include "ChessEngine.h"
+#include "pthread.h"
 
 typedef enum {
     ONE_V_ONE,
@@ -16,6 +18,9 @@ typedef struct {
     Player turn;
 
 } Game_Status;
+
+extern bool gameOver;
+extern Player winner;
 
 void GameController_init();
 void GameController_cleanup();

@@ -5,6 +5,7 @@
         "shareddatalayout.h": "c",
         "led.h": "c",
         "shareddatalayoutlinux.h": "c",
-        "led_controller.h": "c"
+        "led_controller.h": "c",
+        "timer.h": "c"
     }
 }

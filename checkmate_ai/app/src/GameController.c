@@ -32,8 +32,8 @@ static Player turn = PLAYER_WHITE;
 static int whiteTimeRemaining = MAX_TIME_IN_SEC;
 static int blackTimeRemaining = MAX_TIME_IN_SEC;
 
-static Player winner = 2;
-static bool gameOver = false;
+Player winner = 2;
+bool gameOver = false;
 static bool isGameModeSet = false;
 // ADDED:
 static char from[3];
@@ -82,12 +82,18 @@ static long GameController_getCurrentTime(){
 }
 
 static void toggleTurn(){
-
+    pthread_mutex_lock(&timerLock);
     if(turn == PLAYER_WHITE){
+        whitePlayerTimer.running = false;
         turn = PLAYER_BLACK;
+        blackPlayerTimer.running = true;
     }else{
+        blackPlayerTimer.running = false;
         turn = PLAYER_WHITE;
+        whitePlayerTimer.running = true;
     }
+    pthread_mutex_unlock(&timerLock);
+
 }
 
 void* joystickListener() {
@@ -249,10 +255,10 @@ void* GameController_startGame() {
                     // Wait for drop
                     if (boardReader_detectDrop(&rank, &file)) {
                         result = ChessEngine_ProcessMove(rank, file, turn);
+                        // ADDED: Turn off led 
+                        LogicLedManager_turnAllLeds(LED_COLOR_NONE);
 
                         if (result == MOVE_DROP_VALID) {
-                            // ADDED: Turn off led 
-                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             break;
                         } else if (result == MOVE_CAPTURE) {
                             printf("Piece captured!\n");
