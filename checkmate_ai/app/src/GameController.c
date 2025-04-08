@@ -81,7 +81,7 @@ void* joystickListener() {
     while (!isGameModeSet) {
         uint16_t y_value = joystick_get_y();
 
-        if ((y_value > 800 && prevY <= 800) || (y_value < 200 && prevY >= 200)) {
+        if ((y_value > 1200 && prevY <= 1200) || (y_value < 200 && prevY >= 200)) {
             pthread_mutex_lock(&gameModeMutex);
             gameMode = (gameMode == ONE_V_ONE) ? ONE_V_AI : ONE_V_ONE;
             pthread_mutex_unlock(&gameModeMutex);
