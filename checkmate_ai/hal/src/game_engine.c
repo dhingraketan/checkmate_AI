@@ -92,33 +92,38 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
     memset(readBuffer, 0, BUFFER_SIZE);
 
     write(toEngine[1], cmdText, strlen(cmdText));
-    // printf("here1\n");
+    printf("here1\n");
 
     ssize_t bytes_read;
     // char accumulatedOutput[BUFFER_SIZE * 4] = {0};
 
     // printf("here4\n");
 
-    // printf("reading\n");
+    printf("reading\n");
     if(lookFor != NULL && lookFor[0] != '\0'){
         while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
             readBuffer[bytes_read] = '\0';
-            // printf("curr %s", readBuffer);
+            printf("curr %s", readBuffer);
 
 
             if (strstr(readBuffer, lookFor)) {
+                printf("found\n");
                 char *line = strtok(readBuffer, "\n");
                 while (line != NULL) {
                     if (strstr(line, lookFor)) {
+                printf("found1\n");
                         strncpy(lineFound, line, strlen(line));
                         break;
                     }
+                printf("found2\n");
+
                     line = strtok(NULL, "\n");
                 }
                 break;
             }
-            // printf("here3\n");
+            printf("here3 in game\n");
             memset(readBuffer, 0, BUFFER_SIZE);
+            printf("here4 in game\n");
 
         }
     }
@@ -150,11 +155,18 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine)
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     else if(cmd == CMD_D){
+        printf("sending d cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "d\n");
+        snprintf(lookForText, BUFFER_SIZE, "Checkers:");
+
     }
 
     gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
-    // printf("talking done\n");
+    printf("talking done\n");
+    if(cmd == CMD_D){
+        printf("this is d out\n");
+        printf("%s\n", returnLine);
+    }
 
 }
 

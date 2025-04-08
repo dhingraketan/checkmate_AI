@@ -77,6 +77,7 @@ static void GameEngineManager_getFenString(Piece board[8][8]) {
 
 static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
     char bestmove[6];
+    printf("this is line %s\n", line);
     if (strstr(line, "none") != NULL) {
         isCheckMate = true;
         printf("game is over. checkmate\n");
@@ -107,6 +108,7 @@ static void Game_engine_manager_parseOutput(char *line, char *from, char *to){
 void Game_engine_manager_processBoardState(Piece boardState[8][8], int totalMoves, char *from, char *to){
     totalMoves = totalMoves;
     GameEngineManager_getFenString(boardState);
+    printf("this is the fen string %s\n", boadStateFenString);
 
     memset(returnLine, 0, MAX_FEN_STRING_LEN);
 

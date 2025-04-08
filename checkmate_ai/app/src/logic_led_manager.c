@@ -8,6 +8,14 @@
 static bool isInit = false;
 static int colorArr[128];
 
+static int LogicManager_findLedNumber(int row, int col){
+    int ledsDoneInPrevRow = (row * 8);
+    int ledsDoneInCurrRow = (row % 2 == 0) ? (7 - col) : col;
+    int ledNumber = (ledsDoneInCurrRow + ledsDoneInPrevRow) * 2;
+    printf("this is the led position i will light up %d\n", ledNumber);
+    return ledNumber;
+}
+
 static void LogicLedManager_writeColorArr(LIGHT_UP *leds, int count){
     assert(isInit);
 
@@ -15,8 +23,9 @@ static void LogicLedManager_writeColorArr(LIGHT_UP *leds, int count){
 
     if(leds != NULL){
         for(int i = 0; i<count; i++){
-            int ledIndx = (((8 * leds[i].row) + leds[i].col) *2 ) - 2;
-            colors[ledIndx] = leds[i].colorName;
+            int ledNumber = LogicManager_findLedNumber(leds[i].row, leds[i].col);
+            // int ledIndx = (((8 * leds[i].row) + leds[i].col) *2 ) - 2;
+            colors[ledNumber] = leds[i].colorName;
         }
     }
     memcpy(colorArr, colors, sizeof(colorArr));
@@ -38,37 +47,56 @@ void LogicLedManager_turnAllColor(LED_COLOR_NAME ledColor){
     int colors[NEO_NUM_LEDS] = {COLOR_NONE};
 
     for(int i = 0; i < NEO_NUM_LEDS; i++){
-        if(i % 2 == 1){
+        if(i % 2 == 0){ // every even led gets color
             colors[i] = ledColor;
         }
     }
 
     memcpy(colorArr, colors, sizeof(colorArr));
-    printf("logic led manager turn all color color %d\n");
+    printf("logic led manager turn all color %d\n",ledColor);
     led_changeLedColor(colorArr);
 }
 
-// void * LogicLedManager_makeThread(){
-//     assert(isInit);
-    
-//     while(1){
-//         pthread_mutex_lock(&ledMutex);
+void LogicLedManager_makeStructForMove(LIGHT_UP *leds, char *from, char *to){
+    printf("inside make struct for move %s %s\n", from , to);
+    int fromRow = from[1] - '0' - 1;
+    int fromCol = from[0] - 'a';
 
-//         while (!isChangeLed) {
-//             pthread_cond_wait(&ledCondVar, &ledMutex);
-//         }
+    int toRow = to[1] - '0' - 1;
+    int toCol = to[0] - 'a';
 
-//         isChangeLed = false;
-
-//         copyPossibleMoves(possible);
-//         LogicLedManager_changeColor(LIGHT_UP *leds);
-//         pthread_mutex_unlock(&ledMutex);
-
-//     }
-//     return NULL;
-// }
+    printf("from: %d %d. to: %d %d\n", fromRow, fromCol, toRow, toCol);
 
 
+    LIGHT_UP ledFrom, ledTo;
+
+    ledFrom.col = fromCol;
+    ledFrom.row = fromRow;
+    ledFrom.colorName = COLOR_WHITE;
+
+    ledTo.colorName = COLOR_WHITE;
+    ledTo.col = toCol;
+    ledTo.row = toRow;
+
+    leds[0] = ledFrom;
+    leds[1] = ledTo;
+}
+
+void LogicLedManager_makeStructForPossibleMoves(LIGHT_UP *led, int *count, int board[8][8]){
+    int indx = 0;
+    for(int i = 0; i < 8; i++){
+        for(int j = 0; j < 8; j++){
+            // printf("Possible[%d][%d] = %d\n", i, j , possible[i][j]);
+            if(board[i][j]){
+                LIGHT_UP possibleMoveLed = {i, j , COLOR_WHITE};
+                printf("light up %d %d = %d", i, j , COLOR_WHITE);
+                led[indx] = possibleMoveLed;
+                indx++;
+            }
+        }
+    }
+    *count = indx;
+}
 void LogicLedManager_init(){
     isInit = true;
     led_init();

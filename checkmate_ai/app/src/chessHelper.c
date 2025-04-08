@@ -396,34 +396,6 @@ void boardCoordToString(int rank, int file, char* output) {
     output[2] = '\0';            // null terminator
 }
 
-static void chessHelper_makeStructForPossibleMoves(LIGHT_UP *led, int *count){
-    int indx = 0;
-    for(int i = 0; i < 8; i++){
-        for(int j = 0; j < 8; j++){
-            // printf("Possible[%d][%d] = %d\n", i, j , possible[i][j]);
-            if(possible[i][j]){
-                LIGHT_UP possibleMoveLed = {i, j , COLOR_WHITE};
-                printf("light up %d %d = %d", i, j , COLOR_WHITE);
-                led[indx] = possibleMoveLed;
-                indx++;
-            }
-        }
-    }
-    *count = indx;
-}
-static void chessHelper_makeStructForLedMove(LIGHT_UP *leds){
-    LIGHT_UP ledFrom, ledTo;
-    ledFrom.col = 1;
-    ledFrom.row = 1;
-    ledFrom.colorName = COLOR_WHITE;
-    ledTo.colorName = COLOR_WHITE;
-    ledTo.col = 1;
-    ledTo.row = 1;
-    leds[0] = ledFrom;
-    leds[1] = ledTo;
-}
-
-
 
 void *chessGameThread(void *arg) {
     (void)arg;
@@ -437,7 +409,7 @@ void *chessGameThread(void *arg) {
     LogicLedManager_turnAllColor(COLOR_RED);
     
 
-    while (true) {
+    while (!gameOver) {
 
         // Display whose turn it is.
         printf("\n%s Turn\n", (currentTurn == WHITE ? "WHITE" : "BLACK"));
@@ -498,7 +470,7 @@ void *chessGameThread(void *arg) {
             LIGHT_UP leds[NEO_NUM_LEDS] = {0};
             int count; 
             
-            chessHelper_makeStructForPossibleMoves(leds, &count);
+            LogicLedManager_makeStructForPossibleMoves(leds, &count, possible);
             LogicLedManager_changeColor(leds, count);
 
         }
@@ -508,7 +480,7 @@ void *chessGameThread(void *arg) {
             printf("Asking stockfish to make a move\n");
             Game_engine_manager_processBoardState(board, totalMoves, from, to);
             LIGHT_UP leds[2] = {0};
-            chessHelper_makeStructForLedMove(leds);
+            LogicLedManager_makeStructForMove(leds, from, to);
             LogicLedManager_changeColor(leds,2);
             totalMoves +=1;
         }
@@ -528,12 +500,14 @@ void *chessGameThread(void *arg) {
             // show move by lighting up lights
             printf("Stockfish wants to make move from %s to %s\n", from, to);
             LIGHT_UP leds[2] = {0};
-            chessHelper_makeStructForLedMove(leds);
+            LogicLedManager_makeStructForMove(leds, from , to);
             LogicLedManager_changeColor(leds, 2);
+            LogicLedManager_turnAllColor(COLOR_RED);
         }
 
         if(isCheckMate){
             gameOver = true;
+            LogicLedManager_turnAllColor(COLOR_GREEN);
             // turn leds red
         }
 
