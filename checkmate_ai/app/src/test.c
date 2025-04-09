@@ -87,19 +87,21 @@
 #include "game_engine_manager.h"
 
 int main(){
-    boardReader_init();
     lcd_printer_init();
     // ADDED:
     LogicLedManager_init();
     Game_engine_manager_init();
+    boardReader_init();
 
     GameController_init();
     GameController_cleanup();
+    boardReader_cleanup();
 
 
     // ADDED:
     Game_engine_manager_cleanup();
     LogicLedManager_cleanup();
+    lcd_printer_stop_and_cleanup();
 
     
 }

@@ -1,5 +1,6 @@
 #include "BoardReader.h"
 #include "port_extender.h"
+#include "logic_led_manager.h"
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
@@ -88,10 +89,22 @@ void boardReader_init() {
     if(!boardReader_checkInitialPosition()) {
         printf("Board is not in the initial position.\n");
 
-        while (!boardReader_checkInitialPosition()){};
+        while (!boardReader_checkInitialPosition()){
+            LogicLedManager_turnAllLeds(LED_COLOR_RED);
+            usleep(100000); 
+            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+            usleep(100000);
+        };
     }
 
     printf("Board is in the initial position.\n");
+    LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
+    usleep(1000000);
+    LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+    usleep(1000000);
+    LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
+    usleep(1000000);
+    LogicLedManager_turnAllLeds(LED_COLOR_NONE);
 
 }
 

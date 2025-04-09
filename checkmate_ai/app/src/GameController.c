@@ -245,6 +245,21 @@ static void waitUntilAIPhysicalMove(char* from, char* to) {
                 printf("result: %d\n", result);
                 if (result == MOVE_DROP_VALID || result == MOVE_CAPTURE || result == MOVE_PROMOTION) {
                     printf("[AI-Move] Correct drop completed.\n");
+
+                    if(result == MOVE_CAPTURE) {
+
+                        printf("Piece captured!\n");
+                        LogicLedManager_turnAllLeds(LED_COLOR_BLUE);
+                        usleep(1000000);
+                        LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+
+                    } else if (result == MOVE_PROMOTION) {
+
+                        printf("Pawn promoted!\n");
+                        LogicLedManager_turnAllLeds(LED_COLOR_YELLOW);
+                        usleep(1000000);
+                        LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+                    }
                     break;
                 }
             } else {
@@ -326,9 +341,15 @@ void* GameController_startGame() {
                             break;
                         } else if (result == MOVE_CAPTURE) {
                             printf("Piece captured!\n");
+                            LogicLedManager_turnAllLeds(LED_COLOR_BLUE);
+                            usleep(1000000);
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             break;
                         } else if (result == MOVE_PROMOTION) {
                             printf("Pawn promoted!\n");
+                            LogicLedManager_turnAllLeds(LED_COLOR_YELLOW);
+                            usleep(1000000);
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             break;
                         } else if (result == MOVE_GAME_OVER) {
                             gameOver = true;
