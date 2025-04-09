@@ -16,6 +16,7 @@
 #include "btn_statemachine.h"
 #include "game_engine_manager.h"
 #include "logic_led_manager.h"
+#include "joystick_help.h"
 
 #define MAX_HELP_PER_PLAYER 5
 #define MAX_TIME_IN_SEC 600 // 10 minutes
@@ -136,6 +137,26 @@ static void GameController_setGameMode(){
     pthread_join(joystickThread, NULL);
     joystick_cleanup();
 
+}
+
+bool askStockfishForhelp(char *localFrom, char *localTo){
+    if(isGameModeSet) {
+        if(gameMode == ONE_V_ONE || (gameMode == ONE_V_AI && turn == PLAYER_WHITE)){
+            bool localIsUserInCheck = false;
+            bool localIsUserInCheckmate = false;
+
+            Piece boardState[8][8];
+            ChessEngine_getState(boardState); 
+            Game_engine_manager_processBoardState(boardState, totalMoves, localFrom, localTo, &localIsUserInCheck, &localIsUserInCheckmate);
+            return true;
+        }
+    }
+    else {
+       memset(localFrom, 0, 3 * sizeof(char));
+       memset(localTo, 0, 3 * sizeof(char));
+       return false;
+    }
+    return false;
 }
 
 // ADDED:

@@ -6,6 +6,7 @@
         "led.h": "c",
         "shareddatalayoutlinux.h": "c",
         "led_controller.h": "c",
-        "timer.h": "c"
+        "timer.h": "c",
+        "joystick_help.h": "c"
     }
 }

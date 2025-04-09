@@ -30,5 +30,6 @@ Player GameController_getTurn();
 Player GameController_getWinner();
 void GameController_getGameStatus(Game_Status *status);
 char GameController_getCurrTurnString();
+bool askStockfishForhelp(char *localFrom, char *localTo);
 
 #endif
