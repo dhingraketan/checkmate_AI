@@ -173,7 +173,6 @@ static void checkIfCurrUserIsInCheckOrCheckmate(){
         }
 }
 
-
 static void waitUntilPieceReturnedToOriginalSquare() {
     
     uint8_t currState [8][8];
@@ -193,6 +192,69 @@ static void waitUntilPieceReturnedToOriginalSquare() {
 
         if (pieceReturned) break;
 
+        usleep(10000);
+    }
+}
+
+static int squareToRow(char rank) {
+    return rank - '1';
+}
+
+static int squareToCol(char file) {
+    return file - 'a';
+}
+
+static void waitUntilAIPhysicalMove(char* from, char* to) {
+    int fromRow = squareToRow(from[1]);
+    int fromCol = squareToCol(from[0]);
+    int toRow   = squareToRow(to[1]);
+    int toCol   = squareToCol(to[0]);
+
+    // print fromRow, fromCol, toRow, toCol
+    printf("FromRow: %d, FromCol: %d, ToRow: %d, ToCol: %d\n", fromRow, fromCol, toRow, toCol);
+
+    printf("[AI-Move] Waiting for user to physically move piece from %s to %s...\n", from, to);
+
+    int rank, file;
+    MoveResult result;
+
+    // STEP 1: Wait for correct pickup
+    while (true) {
+        if (boardReader_detectPickup(&rank, &file)) {
+            // print tank and file
+            printf("rank: %d, file: %d\n", rank, file);
+            if (rank == fromRow && file == fromCol) {
+                result = ChessEngine_ProcessMove(rank, file, turn);
+                if (result == MOVE_PICKUP_VALID) {
+                    printf("[AI-Move] Correct piece picked up.\n");
+                    break;
+                }
+            } else {
+                printf("[AI-Move] Incorrect pickup at %d,%d. Waiting for correct square.\n", rank, file);  
+            }
+        }
+        usleep(10000);
+    }
+
+    // STEP 2: Wait for correct drop
+    while (true) {
+        if (boardReader_detectDrop(&rank, &file)) {
+            printf("rank: %d, file: %d\n", rank, file);
+            if (rank == toRow && file == toCol) {
+                result = ChessEngine_ProcessMove(rank, file, turn);
+                printf("result: %d\n", result);
+                if (result == MOVE_DROP_VALID || result == MOVE_CAPTURE || result == MOVE_PROMOTION) {
+                    printf("[AI-Move] Correct drop completed.\n");
+                    break;
+                }
+            } else {
+                printf("[AI-Move] Incorrect drop at %d,%d. Waiting for %d,%d.\n", rank, file, toRow, toCol);
+                printf("Pick up the piece again.\n");
+                while(!boardReader_detectPickup(&rank, &file)) {
+                    usleep(10000);
+                }
+            }
+        }
         usleep(10000);
     }
 }
@@ -227,7 +289,8 @@ void* GameController_startGame() {
                             // ADDED:
                             // show possible moves via the led
                             int possibleState[8][8];
-                            ChessEngine_getPossibleState(possibleState);
+                            ChessEngine_getPossibleMoves(rank, file, possibleState);
+
                             LIGHT_UP leds[NEO_NUM_LEDS] = {0};
                             int count; 
                             LogicLedManager_makeStructForPossibleMoves(leds, &count, possibleState);
@@ -244,6 +307,7 @@ void* GameController_startGame() {
                             LogicLedManager_changeColor(&led, count);
 
                             waitUntilPieceReturnedToOriginalSquare();
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             printf("Piece returned. Try again.\n");
                             // ADDED: 
                             // switch off the red led once the piece is returned
@@ -278,6 +342,7 @@ void* GameController_startGame() {
                             LogicLedManager_turnAllLeds(LED_COLOR_RED);
 
                             waitUntilPieceReturnedToOriginalSquare();
+                            LogicLedManager_turnAllLeds(LED_COLOR_NONE);
                             printf("Piece returned. Try again.\n");
 
                             // ADDED:
@@ -323,7 +388,11 @@ void* GameController_startGame() {
                 LogicLedManager_makeStructForMove(leds, from, to);
                 LogicLedManager_changeColor(leds,2);
 
-                sleep(1);
+                printf("AI recommends move from %s to %s\n", from, to);
+
+                waitUntilAIPhysicalMove(from, to);
+                LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+
                 printf("AI move completed.\n");
             }
 
@@ -387,6 +456,7 @@ char GameController_getCurrTurnString(){
 
 
 void GameController_init(){
+    printf("GameController_init\n");
     lcd_printer_toogle_screen(MODE_SELECTION_SCREEN);
     Gpio_initialize();
     BtnStateMachine_init();

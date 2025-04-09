@@ -308,6 +308,7 @@ MoveResult ChessEngine_ProcessMove(int row, int col, Player turn) {
     // ADDED: 
     // using the static array instead so i can access it in a get function
     // int possible[8][8] = {0};
+    memset(possible, 0, sizeof(possible));
     ChessEngine_getPossibleMoves(selectedRow, selectedCol, possible);
 
     if (!possible[row][col]) {
