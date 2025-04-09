@@ -35,6 +35,7 @@ static int blackTimeRemaining = MAX_TIME_IN_SEC;
 
 Player winner = 2;
 bool gameOver = false;
+volatile bool helpPressed = false;
 static bool isGameModeSet = false;
 // ADDED:
 static char from[3];
@@ -140,7 +141,6 @@ static void GameController_setGameMode(){
 }
 
 bool askStockfishForhelp(char *localFrom, char *localTo){
-    if(isGameModeSet) {
         if(gameMode == ONE_V_ONE || (gameMode == ONE_V_AI && turn == PLAYER_WHITE)){
             bool localIsUserInCheck = false;
             bool localIsUserInCheckmate = false;
@@ -150,12 +150,7 @@ bool askStockfishForhelp(char *localFrom, char *localTo){
             Game_engine_manager_processBoardState(boardState, totalMoves, localFrom, localTo, &localIsUserInCheck, &localIsUserInCheckmate);
             return true;
         }
-    }
-    else {
-       memset(localFrom, 0, 3 * sizeof(char));
-       memset(localTo, 0, 3 * sizeof(char));
-       return false;
-    }
+    
     return false;
 }
 
@@ -305,6 +300,7 @@ void waitUntilAIPhysicalMove(char* from, char* to) {
 
 void* GameController_startGame() {
     // ChessEngine_init();
+    helpPressed = false;
 
     while (!gameOver) {
         printf("\nTurn: %s\n", (turn == PLAYER_WHITE ? "WHITE" : "BLACK"));
@@ -324,6 +320,18 @@ void* GameController_startGame() {
 
             while (1) {
                 if (!ChessEngine_isPieceInAir()) {
+                    if(helpPressed){
+                        printf("AI HELP called\n");
+                        if(askStockfishForhelp(from, to)){
+                            printf("AI HELP starting\n");
+                            LIGHT_UP leds[2] = {0};
+                            LogicLedManager_makeStructForMove(leds, from, to);
+                            LogicLedManager_changeColor(leds,2);
+                            printf("AI HELP done\n");
+                
+                        }
+                        helpPressed = false;
+                    }
                     // Wait for pickup
                     if (boardReader_detectPickup(&rank, &file)) {
                         result = ChessEngine_ProcessMove(rank, file, turn);

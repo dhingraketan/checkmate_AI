@@ -8,8 +8,8 @@
 
 static bool isInit = false;
 static pthread_t threadId;
-static char from[3];
-static char to[3];
+// static char from[3];
+// static char to[3];
 
 static void*joystick_help_startThread(){
     // start monitoring the joystick
@@ -23,19 +23,21 @@ static void*joystick_help_startThread(){
         if(counter % 2 == 0){
             // ask stockfish and display move
             printf("joystick left action triggered\n");
-            if(askStockfishForhelp(from, to)) {
-                LIGHT_UP leds[2] = {0};
-                LogicLedManager_makeStructForMove(leds, from, to);
-                LogicLedManager_changeColor(leds,2);
-                printf("AI HELP");
-                waitUntilAIPhysicalMove(from, to);
-                toggleTurn();
-                // LogicLedManager_turnAllLeds(LED_COLOR_NONE);
-                printf("AI HELP DONE\n");
-            }
-            else {
-                printf("mode not set not doing enyhting\n");
-            }
+            // if(askStockfishForhelp(from, to)) {
+            //     // LIGHT_UP leds[2] = {0};
+            //     // LogicLedManager_makeStructForMove(leds, from, to);
+            //     // LogicLedManager_changeColor(leds,2);
+            //     // printf("AI HELP");
+            //     // waitUntilAIPhysicalMove(from, to);
+            //     // toggleTurn();
+            //     helpPressed = true;
+            //     // LogicLedManager_turnAllLeds(LED_COLOR_NONE);
+            //     printf("AI HELP DONE\n");
+            // }
+            // else {
+            //     printf("mode not set not doing enyhting\n");
+            // }
+            helpPressed = true;
             counter = 0;
 
 
@@ -46,6 +48,7 @@ static void*joystick_help_startThread(){
 
 void joystick_help_init(){
     isInit = true;
+    // helpPressed = false;
     printf("joystick help init\n");
     pthread_create(&threadId, NULL, joystick_help_startThread, NULL);
 }

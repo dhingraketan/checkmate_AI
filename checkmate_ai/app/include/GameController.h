@@ -19,8 +19,9 @@ typedef struct {
 
 } Game_Status;
 
-extern bool gameOver;
+extern  bool gameOver;
 extern Player winner;
+extern volatile bool helpPressed;
 
 void GameController_init();
 void GameController_cleanup();

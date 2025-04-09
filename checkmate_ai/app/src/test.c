@@ -14,14 +14,14 @@ int main(){
     Game_engine_manager_init();
     boardReader_init();
     
+    joystick_help_init();
     GameController_init();
-    // joystick_help_init();
     GameController_cleanup();
     boardReader_cleanup();
 
 
     // ADDED:
-    // joystick_help_cleanup();
+    joystick_help_cleanup();
     Game_engine_manager_cleanup();
     LogicLedManager_cleanup();
     lcd_printer_stop_and_cleanup();
