@@ -30,6 +30,8 @@ Player GameController_getTurn();
 Player GameController_getWinner();
 void GameController_getGameStatus(Game_Status *status);
 char GameController_getCurrTurnString();
+void waitUntilAIPhysicalMove(char* from, char* to);
+void toggleTurn();
 bool askStockfishForhelp(char *localFrom, char *localTo);
 
 #endif

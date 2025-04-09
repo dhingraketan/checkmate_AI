@@ -82,7 +82,7 @@ static long GameController_getCurrentTime(){
     
 }
 
-static void toggleTurn(){
+void toggleTurn(){
     pthread_mutex_lock(&timerLock);
     if(turn == PLAYER_WHITE){
         whitePlayerTimer.running = false;
@@ -170,13 +170,12 @@ static void checkIfCurrUserIsInCheckOrCheckmate(){
         if(isUserInCheck){
             // show move by lighting up lights
             printf("%d is in check\n",turn);
-            isUserInCheck = false;
             
             // light up led of the king of the player who is in check
 
             // functionality to show the best move they can make
             // the move is already in from and to chars
-            printf("Stockfish recommends from %s to %s", from, to);
+            printf("Stockfish recommends from inside check method %s to %s", from, to);
 
             LIGHT_UP leds[2] = {0};
             LogicLedManager_makeStructForMove(leds, from , to);
@@ -192,6 +191,7 @@ static void checkIfCurrUserIsInCheckOrCheckmate(){
             printf("Winnner is %d\n", winner);
             LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
         }
+        printf("Check/Checkmate check completed inside check mathod.\n");
 }
 
 static void waitUntilPieceReturnedToOriginalSquare() {
@@ -225,7 +225,7 @@ static int squareToCol(char file) {
     return file - 'a';
 }
 
-static void waitUntilAIPhysicalMove(char* from, char* to) {
+void waitUntilAIPhysicalMove(char* from, char* to) {
     int fromRow = squareToRow(from[1]);
     int fromCol = squareToCol(from[0]);
     int toRow   = squareToRow(to[1]);
@@ -286,13 +286,21 @@ static void waitUntilAIPhysicalMove(char* from, char* to) {
             } else {
                 printf("[AI-Move] Incorrect drop at %d,%d. Waiting for %d,%d.\n", rank, file, toRow, toCol);
                 printf("Pick up the piece again.\n");
+                LIGHT_UP led = {0};
+                int count;
+                LogicLedManager_makeStructForOneLed(&led, rank, file, &count, LED_COLOR_RED);
+                LogicLedManager_changeColor(&led, count);
                 while(!boardReader_detectPickup(&rank, &file)) {
                     usleep(10000);
                 }
+                LogicLedManager_makeStructForOneLed(&led, rank, file, &count, LED_COLOR_NONE);
+                LogicLedManager_changeColor(&led, count);
             }
         }
         usleep(10000);
     }
+
+    printf("Done With AI Physical Move\n");
 }
 
 void* GameController_startGame() {
@@ -478,6 +486,22 @@ void* GameController_startGame() {
 
         if(gameMode == ONE_V_ONE || (gameMode == ONE_V_AI && turn == PLAYER_WHITE) ){
             checkIfCurrUserIsInCheckOrCheckmate();
+            if(isUserInCheck){
+                printf("%d is in check\n",turn);
+                printf("Stockfish recommends from outside is user in check %s to %s", from, to);
+
+                waitUntilAIPhysicalMove(from, to);
+
+                printf("Check move completed.\n");
+                toggleTurn();
+                isUserInCheck = false;
+
+                printf("Turn toggled after check move.\n");
+                printf("Turn: %s\n", (turn == PLAYER_WHITE ? "WHITE" : "BLACK"));
+            }
+            else {
+                printf("User is not in check outside\n");
+            }
         }
 
        
