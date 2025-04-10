@@ -5,6 +5,7 @@ typedef enum {
     CMD_POSITION,
     CMD_GO,
     CMD_IS_READY,
+    CMD_D,
     CMD_NUM_CMDS
 } GAME_ENGINE_CMDS;
 

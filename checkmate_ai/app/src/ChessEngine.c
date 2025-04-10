@@ -7,6 +7,8 @@
 #include <assert.h>
 
 static Piece board[8][8];
+// ADDED:
+static int possible[8][8];
 static bool isInitialized = false;
 
 static int selectedRow = -1;
@@ -145,6 +147,16 @@ void ChessEngine_getState(Piece dest[8][8]) {
     for (int r = 0; r < 8; r++) {
         for (int c = 0; c < 8; c++) {
             dest[r][c] = board[r][c];
+        }
+    }
+}
+
+void ChessEngine_getPossibleState(int dest[8][8]) {
+    assert(isInitialized);
+
+    for (int r = 0; r < 8; r++) {
+        for (int c = 0; c < 8; c++) {
+            dest[r][c] = possible[r][c];
         }
     }
 }
@@ -293,7 +305,10 @@ MoveResult ChessEngine_ProcessMove(int row, int col, Player turn) {
     }
 
     // --- DROPOFF ---
-    int possible[8][8] = {0};
+    // ADDED: 
+    // using the static array instead so i can access it in a get function
+    // int possible[8][8] = {0};
+    memset(possible, 0, sizeof(possible));
     ChessEngine_getPossibleMoves(selectedRow, selectedCol, possible);
 
     if (!possible[row][col]) {
@@ -363,7 +378,6 @@ MoveResult ChessEngine_ProcessMove(int row, int col, Player turn) {
 
     return isCapture ? MOVE_CAPTURE : MOVE_DROP_VALID;
 }
-
 
 
 void ChessEngine_init() {

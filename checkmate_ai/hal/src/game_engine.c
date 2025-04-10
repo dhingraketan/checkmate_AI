@@ -32,7 +32,7 @@ static bool gameEngine_alive(pid_t pid) {
     int status;
     pid_t result = waitpid(pid, &status, WNOHANG);
 
-    printf("checking if its alive\n");
+    // printf("checking if its alive\n");
 
     if (result == 0) return true;  
 
@@ -97,34 +97,36 @@ static void gameEngine_talkToGameEngine(char * cmdText, char *lookFor, char *lin
     ssize_t bytes_read;
     // char accumulatedOutput[BUFFER_SIZE * 4] = {0};
 
-    printf("here4\n");
+    // printf("here4\n");
 
-    // printf("reading\n");
+    printf("reading\n");
     if(lookFor != NULL && lookFor[0] != '\0'){
-        printf("going back\n");
         while ((bytes_read = read(fromEngine[0], readBuffer, BUFFER_SIZE - 1)) > 0) {
             readBuffer[bytes_read] = '\0';
-            // printf("curr %s", readBuffer);
+            printf("curr %s", readBuffer);
 
 
             if (strstr(readBuffer, lookFor)) {
+                printf("found\n");
                 char *line = strtok(readBuffer, "\n");
                 while (line != NULL) {
                     if (strstr(line, lookFor)) {
-                        printf("Found in line: %s\n", line);
+                printf("found1\n");
                         strncpy(lineFound, line, strlen(line));
                         break;
                     }
+                printf("found2\n");
+
                     line = strtok(NULL, "\n");
                 }
                 break;
             }
-            // printf("here3\n");
+            printf("here3 in game\n");
             memset(readBuffer, 0, BUFFER_SIZE);
+            printf("here4 in game\n");
 
         }
     }
-    printf("done writing and reading \n");
 }
 
 
@@ -135,27 +137,36 @@ void gameEngine_sendCmd(GAME_ENGINE_CMDS cmd, char *fenString, char *returnLine)
     if(!gameEngine_alive(pid)) return;
 
     if(cmd == CMD_GO){
-        printf("sending go cmd 1\n");
+        // printf("sending go cmd 1\n");
         snprintf(cmdText, BUFFER_SIZE, "go depth %d\n", DEFAULT_DEPTH );
         snprintf(lookForText, BUFFER_SIZE, "bestmove");
 
     }
     else if(cmd == CMD_POSITION){
-        printf("sending position cmd\n");
+        // printf("sending position cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "position fen %s\n", fenString );
         // snprintf(cmdText, BUFFER_SIZE, "isready\n");
         // snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
     else if(cmd == CMD_IS_READY){
-        printf("sending is ready cmd\n");
+        // printf("sending is ready cmd\n");
         snprintf(cmdText, BUFFER_SIZE, "isready\n");
         snprintf(cmdText, BUFFER_SIZE, "isready\n");
         snprintf(lookForText, BUFFER_SIZE, "readyok\n");
     }
-    printf("talking\n");
+    else if(cmd == CMD_D){
+        printf("sending d cmd\n");
+        snprintf(cmdText, BUFFER_SIZE, "d\n");
+        snprintf(lookForText, BUFFER_SIZE, "Checkers:");
+
+    }
 
     gameEngine_talkToGameEngine(cmdText, lookForText, returnLine);
     printf("talking done\n");
+    if(cmd == CMD_D){
+        printf("this is d out\n");
+        printf("%s\n", returnLine);
+    }
 
 }
 

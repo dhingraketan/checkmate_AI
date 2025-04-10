@@ -1,9 +1,12 @@
+#ifndef _CHESS_HELPER_H
+#define _CHESS_HELPER_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 // Define piece types and colors.
 typedef enum { EMPTY, PAWN, ROOK, KNIGHT, BISHOP, QUEEN, KING } PieceType;
@@ -39,10 +42,16 @@ void processPieceSelection(const char *input);
 
 void processDestination(const char *input);
 
-
-
 void copyBoardState(Piece dest[8][8]); //for board state
 
 char getCurrentTurnString();
 
 void toggleCurrentTurn();
+
+void copyPossibleMoves(int dest[8][8]);
+
+void chessHelper_cleanup();
+
+bool chessHelper_getIsValidMove();
+
+#endif

@@ -1,20 +1,33 @@
 #include "chessHelper.h"
 #include "sensor_game_engine_manager.h"
 #include "BoardReader.h"
+#include "game_engine_manager.h"
 #include <unistd.h>
+#include "logic_led_manager.h"
+
+#define NEO_NUM_LEDS 64
 
 
 pthread_cond_t stockfishTurnCond = PTHREAD_COND_INITIALIZER;
 pthread_cond_t userTurnCond = PTHREAD_COND_INITIALIZER;
+// pthread_cond_t ledCondVar = PTHREAD_COND_INITIALIZER;
 pthread_mutex_t boardMutex = PTHREAD_MUTEX_INITIALIZER;
+// pthread_mutex_t ledMutex = PTHREAD_MUTEX_INITIALIZER;
+
 bool isStockfishTurn = false;
 bool isUserTurn = true;
+
 
 static Piece board[8][8];
 static int possible[8][8];
 static int pieceSelected = 0;
 static int selectedRow = -1, selectedCol = -1;
 static Color currentTurn = WHITE;
+static bool gameOver = false;
+static int totalMoves = 0;
+static char from[3];
+static char to[3];
+static bool invalidMove = false;
 
 
 // Initialize board with standard chess starting positions.
@@ -298,10 +311,12 @@ void processPieceSelection(const char *input) {
     if (board[row][col].type == EMPTY || board[row][col].color != currentTurn) {
         printf("Invalid selection: No %s piece at that square.\n",
                (currentTurn == WHITE ? "WHITE" : "BLACK"));
+        invalidMove = true;
         return;
     }
     //pthread_mutex_unlock(&boardMutex);
 
+    invalidMove = false;
     pieceSelected = 1;
     selectedRow = row;
     selectedCol = col;
@@ -321,9 +336,11 @@ void processDestination(const char *input) {
         if (destRow == selectedRow && destCol == selectedCol) {
             pieceSelected = 0;
             memset(possible, 0, sizeof(possible));
+            invalidMove = false;
             return;
         }
         printf("Invalid move, try again.\n");
+        invalidMove = true;
         return;
     }
 
@@ -338,7 +355,7 @@ void processDestination(const char *input) {
             printf("Game over: %s King has been killed.\n",
                    (board[destRow][destCol].color == WHITE ? "White" : "Black"));
             // End the thread if the king is captured.
-            pthread_exit(NULL);
+            gameOver = true;
         } else {
             printf("Captured %s %s at %d%c.\n",
                    (board[destRow][destCol].color == WHITE ? "White" : "Black"),
@@ -361,12 +378,10 @@ void processDestination(const char *input) {
         }
     }
 
-    ////pthread_mutex_unlock(&boardMutex);
-
-    
     // Clear selection and switch turn.
     pieceSelected = 0;
     memset(possible, 0, sizeof(possible));
+    invalidMove = false;
     toggleCurrentTurn();
 }
 
@@ -382,27 +397,20 @@ void boardCoordToString(int rank, int file, char* output) {
 }
 
 
-
 void *chessGameThread(void *arg) {
     (void)arg;
+    printf("Init chess game thread\n");
     
 
     char input[100];
 
     // Initialize the board.
     initializeBoard();
+    LogicLedManager_turnAllLeds(LED_COLOR_RED);
+    
 
-    while (1) {
+    while (!gameOver) {
 
-        pthread_mutex_lock(&boardMutex);
-
-        while(!isUserTurn){
-            pthread_cond_wait(&userTurnCond, &boardMutex);
-        }
-
-        pthread_mutex_unlock(&boardMutex);
-
-        pthread_mutex_lock(&boardMutex);
         // Display whose turn it is.
         printf("\n%s Turn\n", (currentTurn == WHITE ? "WHITE" : "BLACK"));
         // Print the board.
@@ -438,6 +446,7 @@ void *chessGameThread(void *arg) {
             while(!boardReader_detectPickup(&rank, &file)){
                 usleep(10000); // 10 ms delay
             }
+            printf("pickup detected\n");
         }
         printf("----------...\n");
         // Convert the rank and file to a string.
@@ -455,15 +464,52 @@ void *chessGameThread(void *arg) {
         // Process the input.
         processInput(input);
 
-        if(currentTurn == BLACK){
-            isUserTurn = false;
-            isStockfishTurn = true;
+        if(pieceSelected && currentTurn != BLACK){
+            // light up possible moves
+            printf("lighting up possible moves\n");
+            LIGHT_UP leds[NEO_NUM_LEDS] = {0};
+            int count; 
+            
+            LogicLedManager_makeStructForPossibleMoves(leds, &count, possible);
+            LogicLedManager_changeColor(leds, count);
 
-            // Signal the Stockfish thread to start
-            pthread_cond_signal(&stockfishTurnCond);
         }
-        pthread_mutex_unlock(&boardMutex);
 
+        if(currentTurn == BLACK){
+            // ask stock fish to make a move
+            printf("Asking stockfish to make a move\n");
+            Game_engine_manager_processBoardState(board, totalMoves, from, to, &isCheck, &isCheckMate);
+            LIGHT_UP leds[2] = {0};
+            LogicLedManager_makeStructForMove(leds, from, to);
+            LogicLedManager_changeColor(leds,2);
+            totalMoves +=1;
+        }
+       
+        if(!pieceSelected && currentTurn == WHITE) { // turn off possible move light when player has made the move
+            // switch all off
+            printf("switching all off\n");
+            LIGHT_UP *leds = NULL;
+            LogicLedManager_changeColor(leds, 0);
+        }
+
+        printf("checking for check and check mate\n");
+        // check for check and check mate - this also gets the best move if a move is possible
+        Game_engine_manager_processBoardState(board, totalMoves, from, to, &isCheck, &isCheckMate);
+
+        if(isCheck){
+            // show move by lighting up lights
+            printf("Stockfish wants to make move from %s to %s\n", from, to);
+            LIGHT_UP leds[2] = {0};
+            LogicLedManager_makeStructForMove(leds, from , to);
+            LogicLedManager_changeColor(leds, 2);
+            LogicLedManager_turnAllLeds(LED_COLOR_RED);
+        }
+
+        if(isCheckMate){
+            gameOver = true;
+            LogicLedManager_turnAllLeds(LED_COLOR_GREEN);
+            // turn leds red
+        }
 
         
     }
@@ -473,7 +519,7 @@ void *chessGameThread(void *arg) {
 
 //for board state
 void copyBoardState(Piece dest[8][8]) {
-    printf("copying board\n");
+    // printf("copying board\n");
     //pthread_mutex_lock(&boardMutex);
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
@@ -481,6 +527,15 @@ void copyBoardState(Piece dest[8][8]) {
         }
     }
     //pthread_mutex_lock(&boardMutex);
+}
+
+//for possible array
+void copyPossibleMoves(int dest[8][8]) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            dest[i][j] = possible[i][j];
+        }
+    }
 }
 
 Color getCurrentTurn(){
@@ -494,3 +549,11 @@ char getCurrentTurnString(){
 void toggleCurrentTurn(){
     currentTurn = (currentTurn == WHITE ? BLACK : WHITE);
 }
+
+void chessHelper_cleanup(){}
+
+bool chessHelper_getIsValidMove(){
+    return !invalidMove;
+}
+
+

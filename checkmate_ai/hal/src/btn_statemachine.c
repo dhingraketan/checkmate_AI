@@ -83,7 +83,7 @@ void BtnStateMachine_doState()
 {
     assert(isInitialized);
 
-    //printf("\n\nWaiting for an event...\n");
+    printf("\n\nWaiting for an event...\n");
     // while (true) {
         struct gpiod_line_bulk bulkEvents;
         int numEvents = Gpio_waitForLineChange(s_lineBtn, &bulkEvents);
